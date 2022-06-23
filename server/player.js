@@ -6,7 +6,7 @@ class Player {
     this.x = x
     this.y = y
     this.angle = 0
-    this.speed = 500
+    this.speed = 200
     this.moveState = {}
   }
   handleInput(input) {
