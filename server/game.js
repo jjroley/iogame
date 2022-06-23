@@ -37,13 +37,13 @@ class Game {
       player.update(dt)
     })
 
-    this.bullets = this.bullets.filter(b => !b.dead)
-    // for(var i = this.bullets.length - 1; i >= 0; i--) {
-    //   if(this.bullets[i].dead) {
-    //     this.bullets.splice(i, 1)
-    //     continue;
-    //   }
-    // }
+    for(var i = this.bullets.length - 1; i >= 0; i--) {
+      if(this.bullets[i].dead) {
+        this.bullets.splice(i, 1)
+        continue;
+      }
+      this.bullets[i].update(dt)
+    }
 
     if(this.sendUpdate) {
       for(const key in this.players) {
@@ -55,12 +55,13 @@ class Game {
   }
   buildUpdate(player) {
     const others = Object.values(this.players).filter(p => p !== player).map(p => p.getData())
-      
+    const bullets = this.bullets.map(bullet => bullet.getData())
+
     return {
       timestamp: Date.now(),
       me: player.getData(),
       others,
-      bullets: this.bullets
+      bullets,
     }
   }
 }

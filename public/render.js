@@ -52,7 +52,9 @@ const renderData = (data) => {
     // console.log(data.bullets)
     data.bullets.forEach(bullet => {
       ctx.fillStyle = 'gray'
+      ctx.beginPath()
       ctx.ellipse(bullet.x, bullet.y, 10, 10, 0, 0, Math.PI * 2)
+      ctx.fill()
     })
   }
   ctx.restore()
