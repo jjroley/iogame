@@ -17,16 +17,13 @@ class Player {
     this.moveState = input
   }
   update(dt) {
-    if(this.moveState.up) this.yVel -= this.accel
-    else if(this.moveState.down) this.yVel += this.accel
+    if(this.moveState.up) this.yVel = Math.max(this.yVel - this.accel, -this.speed)
+    else if(this.moveState.down) this.yVel = Math.min(this.yVel + this.accel, this.speed)
     else this.yVel *= this.slowdown
     
-    if(this.moveState.left) this.xVel -= this.accel
-    else if(this.moveState.right) this.xVel += this.accel
+    if(this.moveState.left) this.xVel = Math.max(this.xVel - this.accel, -this.speed)
+    else if(this.moveState.right) this.xVel = Math.min(this.xVel + this.accel, this.speed)
     else this.xVel *= this.slowdown
-
-    this.xVel = Math.min(this.speed, Math.max(this.xVel, -this.speed))
-    this.yVel = Math.min(this.speed, Math.max(this.yVel, -this.speed))
 
     this.angle = this.moveState.angle
     this.x += this.xVel * dt

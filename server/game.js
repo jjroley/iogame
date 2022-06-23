@@ -1,6 +1,10 @@
 const { Bullet } = require('./bullet')
 const { Player } = require('./player')
 
+const dist = (x1, y1, x2, y2) => {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+}
+
 class Game {
   constructor() {
     this.players = {}
@@ -33,17 +37,26 @@ class Game {
     const dt = (now - this.lastUpdate) / 1000
     this.lastUpdate = now
 
-    Object.values(this.players).forEach(player => {
-      player.update(dt)
-    })
-
     for(var i = this.bullets.length - 1; i >= 0; i--) {
-      if(this.bullets[i].dead) {
+      const bullet = this.bullets[i]
+      if(bullet.dead) {
         this.bullets.splice(i, 1)
         continue;
       }
+      Object.values(this.players).forEach(player => {
+        if(bullet.playerId === player.id) return
+        if(dist(bullet.x, bullet.y, player.x, player.y) < 25) {
+          player.xVel += bullet.xVel * bullet.speed
+          player.yVel += bullet.yVel * bullet.speed
+          bullet.dead = true
+        }
+      })
       this.bullets[i].update(dt)
     }
+
+    Object.values(this.players).forEach(player => {
+      player.update(dt)
+    })
 
     if(this.sendUpdate) {
       for(const key in this.players) {

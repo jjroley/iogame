@@ -8,7 +8,7 @@ class Bullet {
     this.y = y
     this.xVel = Math.cos(angle)
     this.yVel = Math.sin(angle)
-    this.speed = 600
+    this.speed = 1000
     this.time = 10
     this.dead = false
   }
