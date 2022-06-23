@@ -19,6 +19,10 @@ const renderPlayer = player => {
   ctx.ellipse(30, -30, 10, 10, 0, 0, Math.TWO_PI)
   ctx.fill()
   ctx.stroke()
+  ctx.fillStyle = player.health > 50 ? 'rgb(0, 200, 0)' :
+                  player.health > 25 ? 'rgb(200, 200, 0)' :
+                  'rgb(200, 0, 0)'
+  ctx.fillRect(-50, -30, player.health, 10)
   ctx.restore()
 }
 
@@ -53,7 +57,7 @@ const renderData = (data) => {
     data.bullets.forEach(bullet => {
       ctx.fillStyle = 'gray'
       ctx.beginPath()
-      ctx.ellipse(bullet.x, bullet.y, 10, 10, 0, 0, Math.PI * 2)
+      ctx.ellipse(bullet.x, bullet.y, 5, 5, 0, 0, Math.PI * 2)
       ctx.fill()
     })
   }

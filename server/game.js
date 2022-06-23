@@ -45,9 +45,10 @@ class Game {
       }
       Object.values(this.players).forEach(player => {
         if(bullet.playerId === player.id) return
-        if(dist(bullet.x, bullet.y, player.x, player.y) < 25) {
+        if(dist(bullet.x, bullet.y, player.x, player.y) < 30) {
           player.xVel += bullet.xVel * bullet.speed
           player.yVel += bullet.yVel * bullet.speed
+          player.health -= 5
           bullet.dead = true
         }
       })

@@ -7,10 +7,11 @@ const interpolateObject = (a, b, c) => {
   for(var key in a) {
     if(key === 'angle') {
       interp[key] = interpolateAngle(a[key], b[key], c)
-    }else {
+    }else if(key === 'x' || key === 'y') {
       interp[key] = lerp(a[key], b[key], c)
+    }else {
+      interp[key] = a[key]
     }
-    
   }
   return interp
 }

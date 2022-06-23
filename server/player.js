@@ -11,6 +11,7 @@ class Player {
     this.angle = 0
     this.speed = 200
     this.slowdown = 0.9
+    this.health = 100
     this.moveState = {}
   }
   handleInput(input) {
@@ -34,7 +35,9 @@ class Player {
       id: this.id,
       x: this.x,
       y: this.y,
-      angle: this.angle
+      angle: this.angle,
+      health: this.health,
+      username: this.username
     }
   }
 }
