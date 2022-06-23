@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IO game</title>
+    <link href='style.css' rel='stylesheet'>
+  </head>
+  <body>
+    <canvas id='canvas'></canvas>
+    <form id='username-form'>
+      <input id='username' placeholder='username'>
+      <button id="join-game">Join Game</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="helpers.js"></script>
+    <script src="interpolate.js"></script>
+    <script src='serverUpdate.js'></script>
+    <script src="render.js"></script>
+    <script src='script.js'></script>
+  </body>
+</html>
