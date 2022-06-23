@@ -1,30 +1,56 @@
 
 
 const renderPlayer = player => {
-  ctx.save()
-  ctx.translate(player.x, player.y)
-  ctx.rotate(player.angle)
-  ctx.fillStyle = 'rgb(255, 179, 0)'
-  ctx.strokeStyle = 'rgb(200, 130, 0)'
-  ctx.lineWidth = 3
-  ctx.beginPath()
-  ctx.ellipse(0, 0, 30, 30, 0, 0, Math.TWO_PI)
-  ctx.fill()
-  ctx.stroke()
-  ctx.beginPath()
-  ctx.ellipse(30, 30, 10, 10, 0, 0, Math.TWO_PI)
-  ctx.fill()
-  ctx.stroke()
-  ctx.beginPath()
-  ctx.ellipse(30, -30, 10, 10, 0, 0, Math.TWO_PI)
-  ctx.fill()
-  ctx.stroke()
-  ctx.fillStyle = player.health > 50 ? 'rgb(0, 200, 0)' :
-                  player.health > 25 ? 'rgb(200, 200, 0)' :
-                  'rgb(200, 0, 0)'
-  ctx.fillRect(-50, -30, player.health, 10)
-  ctx.restore()
+
+  // display player
+  wrap(() => {
+    ctx.translate(player.x, player.y)
+    ctx.rotate(player.angle)
+    ctx.fillStyle = 'rgb(255, 179, 0)'
+    ctx.strokeStyle = 'rgb(200, 130, 0)'
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.ellipse(0, 0, 30, 30, 0, 0, Math.TWO_PI)
+    ctx.fill()
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.ellipse(30, 30, 10, 10, 0, 0, Math.TWO_PI)
+    ctx.fill()
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.ellipse(30, -30, 10, 10, 0, 0, Math.TWO_PI)
+    ctx.fill()
+    ctx.stroke()
+  })
+
+  // draw health bar
+  wrap(() => {
+    ctx.fillStyle = 'transparent'
+    ctx.strokeStyle = 'white'
+    ctx.beginPath()
+    ctx.rect(player.x - 50, player.y - 50, 100, 10)
+    ctx.fill()
+    ctx.stroke()
+    let colorRed = 'rgb(200, 0, 0)'
+    let colorGreen = 'rgb(0, 200, 0)'
+    let colorYellow = 'rgb(200, 200, 0)'
+    ctx.fillStyle = player.health > 50 ? colorGreen : player.health > 25 ?  colorYellow : colorRed                 
+    ctx.beginPath()
+    ctx.rect(player.x - 50, player.y - 50, player.health, 10)
+    ctx.fill()
+  })
+
+  // display name
+  wrap(() => {
+    ctx.beginPath()
+    ctx.fillStyle = 'white'
+    ctx.font = '30px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(player.username, player.x, player.y)
+  })
 }
+
 
 const cam = {
   x: 0, y: 0,
@@ -77,6 +103,12 @@ const cache = (w, h, cb, type) => {
     return pattern
   }
   return can
+}
+
+const wrap = (cb) => {
+  ctx.save()
+  cb()
+  ctx.restore()
 }
 
 const dist = (x1, y1, x2, y2) => {

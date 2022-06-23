@@ -48,8 +48,14 @@ class Game {
         if(dist(bullet.x, bullet.y, player.x, player.y) < 30) {
           player.xVel += bullet.xVel * bullet.speed
           player.yVel += bullet.yVel * bullet.speed
-          player.health -= 5
+          player.health -= 20
           bullet.dead = true
+          if(player.health <= 0) {
+            this.sockets[player.id].emit("death", {
+              shotBy: this.players[bullet.playerId].username
+            })
+            this.removePlayer(player.id)
+          }
         }
       })
       this.bullets[i].update(dt)

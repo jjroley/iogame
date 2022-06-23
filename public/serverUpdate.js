@@ -66,11 +66,15 @@ const connect = () => {
 }
 
 
+
+
 connect().then(() => {
   socket.on('gameupdate', processGameUpdate)
-  loadUserForm()
-  startCapturingInput()
-  socket.on('gameover', () => {
+  loadGame()
+  socket.on('death', ({ shotBy }) => {
     stopCapturingInput()
+    deathModal.classList.remove('hidden')
+    deathModal.querySelector('div').innerText = `Shot by ${shotBy}`
+    playAgainBtn.addEventListener('click', replayGame)
   })
 })

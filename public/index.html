@@ -6,10 +6,15 @@
   </head>
   <body>
     <canvas id='canvas'></canvas>
-    <form id='username-form'>
+    <form id='username-form' class='hidden'>
       <input id='username' placeholder='username'>
       <button id="join-game">Join Game</button>
     </form>
+    <div id='death-modal' class='hidden'>
+      <h1>You died!</h1>
+      <div>Shot by Anonymous</div>
+      <button id='play-again-btn'>Play Again?</button>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="helpers.js"></script>
     <script src="interpolate.js"></script>

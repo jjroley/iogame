@@ -2,14 +2,36 @@
 
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
-const width = canvas.width = window.innerWidth
-const height = canvas.height = window.innerHeight
+
+let width, height, scaleRatio = 1
+onResize()
+
+function onResize() {
+  scaleRatio = Math.max(1, 800 / window.innerWidth)
+  width = canvas.width = window.innerWidth * scaleRatio
+  height = canvas.height = window.innerHeight * scaleRatio
+}
+
+window.onresize = onResize()
 
 let mouseX = 0, mouseY = 0;
 
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
 const joinGameBtn = document.getElementById('join-btn')
+const deathModal = document.getElementById('death-modal')
+const playAgainBtn = document.getElementById('play-again-btn')
+
+
+function loadGame() {
+  loadUserForm()
+  deathModal.classList.add('hidden')
+  playAgainBtn.removeEventListener('click', replayGame)
+}
+
+const replayGame = () => {
+  loadUserForm()
+}
 
 const loadUserForm = () => {
   usernameForm.style.display = 'block'
@@ -19,6 +41,7 @@ const loadUserForm = () => {
     console.log("Requesting to join", usernameInput.value)
     usernameInput.value = ''
     usernameForm.style.display = 'none'
+    startCapturingInput()
   })
 }
 
@@ -64,8 +87,8 @@ function handleClick(e) {
   socket.emit('shoot', e.mouseButton)
 }
 function handleMouse(e) {
-  mouseX = e.clientX
-  mouseY = e.clientY
+  mouseX = e.clientX * scaleRatio
+  mouseY = e.clientY * scaleRatio
 }
 function startCapturingInput() {
   window.addEventListener('keydown', handleKeyDown)
