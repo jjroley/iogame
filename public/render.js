@@ -97,7 +97,4 @@ const grass = cache(360, 360, (can, ctx, w, h) => {
       ctx.fillRect(x * 90, y * 90, 90, 90)
     }
   }
-  ctx.strokeStyle = 'rgb(0, 0, 0)'
-  ctx.lineWidth = 10
-  ctx.strokeRect(0, 0, w, h)
 }, 'pattern')
