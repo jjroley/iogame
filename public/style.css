@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Titan+One&display=swap');
+
 html, body {
   margin: 0;
   padding: 0;
@@ -5,6 +7,7 @@ html, body {
 
 body {
   overflow: hidden;
+  font-family: "Titan One", 'sans-serif';
 }
 
 #username-form {
@@ -12,15 +15,23 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
 }
 
 #death-modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: white;
-  padding: 20px;
+  padding: 20px 50px;
+  text-align: center;
+/*   display: block !important; */
+}
+
+#death-modal h1 {
+  font-size: 40px;
+}
+
+#death-modal div {
+  margin: 20px 0;
 }
 
 .hidden {
@@ -43,4 +54,19 @@ body {
   height: 100%;
   top: 0;
   left: 0;
+}
+
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  background: white;
+  border: 1px solid black;
+}
+
+input[type='text'] {
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 16px;
 }

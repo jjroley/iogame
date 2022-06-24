@@ -1,4 +1,5 @@
 const shortid = require('shortid')
+const { pointCenterRectCollide } = require('../shared/collide')
 
 class Bullet {
   constructor(playerId, x, y, angle) {
@@ -11,6 +12,14 @@ class Bullet {
     this.speed = 1000
     this.time = 10
     this.dead = false
+  }
+  handleCollide(blocks) {
+    for(const b of blocks) {
+      if(pointCenterRectCollide(this.x, this.y, b.x, b.y, b.w, b.h)) {
+        this.dead = true
+        break;
+      }
+    }
   }
   update(dt) {
     this.x += this.xVel * dt * this.speed

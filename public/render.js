@@ -44,10 +44,10 @@ const renderPlayer = player => {
   wrap(() => {
     ctx.beginPath()
     ctx.fillStyle = 'white'
-    ctx.font = '30px sans-serif'
+    ctx.font = `30px ${FONT}`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(player.username, player.x, player.y)
+    ctx.fillText(player.username, player.x, player.y - 70)
   })
 }
 
@@ -61,7 +61,7 @@ const cam = {
     this.y = player.y - height / 2
     this.mouseX = mouseX + this.x
     this.mouseY = mouseY + this.y
-    ctx.translate(-this.x, -this.y)
+    ctx.translate(~~-this.x, ~~-this.y)
   }
 }
 
@@ -85,6 +85,17 @@ const renderData = (data) => {
       ctx.beginPath()
       ctx.ellipse(bullet.x, bullet.y, 5, 5, 0, 0, Math.PI * 2)
       ctx.fill()
+    })
+  }
+  wrap(() => {
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 10
+    ctx.strokeRect(-1000, -1000, 2000, 2000)
+  })
+  if(data.blocks) {
+    ctx.fillStyle = 'gray'
+    data.blocks.forEach(b => {
+      ctx.fillRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h)
     })
   }
   ctx.restore()

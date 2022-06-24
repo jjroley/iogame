@@ -9,14 +9,14 @@
       <canvas id='canvas'></canvas>
       <div id='canvas-overlay'>
         <form id='username-form' class='hidden'>
-          <input id='username' placeholder='username'>
+          <input type='text' id='username' placeholder='username'>
           <button id="join-game">Join Game</button>
         </form>
-        <div id='death-modal' class='hidden'>
+        <dialog id='death-modal'>
           <h1>You died!</h1>
           <div>Shot by Anonymous</div>
           <button id='play-again-btn'>Play Again?</button>
-        </div>
+        </dialog>
       </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>

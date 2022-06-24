@@ -6,14 +6,22 @@ class SceneHandler {
     this.scenes = {}
     this.__sceneCallbacks = []
     this.__cleanupCallbacks = []
-    this.__frameId = 0
+    this.__resizeCallbacks = []
+    this.frameId = 0
     this.animated = false
 
+    this.init()
+  }
+  init() {
     this._draw = () => {
       if(!this.animated) return
       this.run()
       this.frameId = window.requestAnimationFrame(this._draw)
     }
+    this._resize = () => {
+      this.__resizeCallbacks.forEach(cb => cb())
+    }
+    window.addEventListener('resize', this._resize)
   }
   to(newScene, data) {
     if(newScene in this.scenes) {
@@ -23,8 +31,10 @@ class SceneHandler {
       this.cancelLoop()
       this.__cleanupCallbacks = []
       this.__sceneCallbacks = []
+      this.__resizeCallbacks = []
       this.currentScene = newScene
       this.scenes[newScene](data)
+      this._resize()
     }
   }
   use(name, cb) {
@@ -41,6 +51,9 @@ class SceneHandler {
   cancelLoop() {
     this.animated = false
     window.cancelAnimationFrame(this.frameId)
+  }
+  resize(cb) {
+    this.__resizeCallbacks.push(cb)
   }
   cleanup(cb) {
     this.__cleanupCallbacks.push(cb)

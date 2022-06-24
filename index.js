@@ -13,7 +13,6 @@ const io = new SocketServer(server)
 io.on('connection', socket => {
   console.log("Client connected: " + socket.id)
   socket.on('join game', function(username) {
-    console.log(this)
     console.log('Joining game', username)
     game.addPlayer(socket, username)
   })
@@ -33,5 +32,12 @@ server.listen(3000, () => console.log("Server up!"))
 
 const game = new Game()
 
-
+game.addBlock(-5, -5)
+game.addBlock(-4, -5)
+game.addBlock(-3, -5)
+game.addBlock(-2, -5)
+game.addBlock(-1, -5)
+game.addBlock(-0, -5)
+game.addBlock(0, -6)
+game.addBlock(0, -7)
 

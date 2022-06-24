@@ -1,3 +1,7 @@
+const { rectRectCollide } = require('../shared/collide')
+
+const constrain = (a, b, c) => a < b ? b : a > c ? c : a
+const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
 
 class Player {
   constructor(id, username, x, y) {
@@ -17,7 +21,7 @@ class Player {
   handleInput(input) {
     this.moveState = input
   }
-  update(dt) {
+  update(dt, blocks) {
     if(this.moveState.up) this.yVel = Math.max(this.yVel - this.accel, -this.speed)
     else if(this.moveState.down) this.yVel = Math.min(this.yVel + this.accel, this.speed)
     else this.yVel *= this.slowdown
@@ -27,8 +31,45 @@ class Player {
     else this.xVel *= this.slowdown
 
     this.angle = this.moveState.angle
+
+    const oldPos = { x: this.x, y: this.y }
+
+    
     this.x += this.xVel * dt
     this.y += this.yVel * dt
+
+    for(const b of blocks) {
+      if(!rectRectCollide(this.x, this.y, 60, 60, b.x, b.y, b.w, b.h)) continue;
+      const blockedX = Math.abs(oldPos.y - b.y) * 2 < 60 + b.h
+      const blockedY = Math.abs(oldPos.x - b.x) * 2 < 60 + b.w
+      if(blockedX || !blockedY) {
+        this.x = b.x + sign(this.x - b.x) * (60 + b.w) / 2
+        this.xVel = 0
+      }
+      if(blockedY || !blockedX) {
+        this.y = b.y + sign(this.y - b.y) * (60 + b.h) / 2
+        this.yVel = 0
+      }
+    }
+
+    if(this.x < -970) {
+      this.x = -970
+      this.xVel = 0
+    }
+    if(this.x > 970) {
+      this.x = 970
+      this.xVel = 0
+    }
+    if(this.y < -970) {
+      this.y = -970
+      this.yVel = 0
+    }
+    if(this.y > 970) {
+      this.y = 970
+      this.yVel = 0
+    }
+    // this.x = constrain(this.x, -970, 970)
+    // this.y = constrain(this.y, -970, 970)
   }
   getData() {
     return {

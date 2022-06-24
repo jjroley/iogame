@@ -1,9 +1,11 @@
 
+const FONT = 'Titan One, sans-serif'
 
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
 let width, height, scaleRatio = 1
+let mouseX = 0, mouseY = 0;
 
 function onResize() {
   scaleRatio = Math.max(1, 800 / window.innerWidth)
@@ -11,9 +13,9 @@ function onResize() {
   height = canvas.height = window.innerHeight * scaleRatio
 }
 onResize()
-window.onresize = onResize()
+window.addEventListener('resize', onResize)
 
-let mouseX = 0, mouseY = 0;
+
 
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
@@ -22,7 +24,7 @@ const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
 
 
-const inputCode = { angle: 0 }
+let inputCode = { angle: 0 }
 function handleKeyDown(e) {
   if(e.keyCode === 87 || e.keyCode === 38) {
     inputCode.up = true
@@ -77,7 +79,8 @@ const scene = new SceneHandler()
 
 scene.use('menu', () => {
   usernameForm.classList.remove('hidden')
-  
+  usernameInput.focus()
+
   const checkForInput = e => {
     e.preventDefault()
     socket.emit('join game', usernameInput.value)
@@ -87,9 +90,19 @@ scene.use('menu', () => {
   }
 
   usernameForm.addEventListener('submit', checkForInput)
+
+  scene.resize(() => {
+    ctx.fillStyle = '#0a0'
+    ctx.fillRect(0, 0, width, height)
   
-  ctx.fillStyle = 'blue'
-  ctx.fillRect(0, 0, width, height)
+    wrap(() => {
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.font = `100px ${FONT}`
+      ctx.fillStyle = 'white'
+      ctx.fillText("Paintball.io", width / 2, height / 4)
+    })
+  })
   
   scene.cleanup(() => {
     usernameForm.removeEventListener('submit', checkForInput)
@@ -98,19 +111,27 @@ scene.use('menu', () => {
 })
 
 scene.use('game', () => {
+
+  inputCode = { angle: 0 }
   startCapturingInput()
   
   gameUpdates = []
   firstServerTimestamp = 0
   gameStart = 0
+
+  let blocks = []
   
   socket.on('gameupdate', processGameUpdate)
   socket.on('death', data => scene.to('death', data))
+  socket.on('initialState', data => {
+    console.log(data)
+    blocks = data.blocks
+  })
   
   // updated 60 times per second
   scene.loop(() => {
     const state = getCurrentState()
-    renderData(state)
+    renderData({ ...state, blocks })
     if(state.me) {
       inputCode.angle = Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
       socket.emit('input', inputCode)
@@ -121,11 +142,13 @@ scene.use('game', () => {
   scene.cleanup(() => {
     stopCapturingInput()
     socket.off('death')
+    socket.off('gameupdate')
+    socket.off('initialState')
   })
 })
 
 scene.use('death', (data) => {
-  deathModal.classList.remove('hidden')
+  deathModal.showModal()
 
   deathModal.querySelector('div').innerText = "Shot by " + data.shotBy
   
@@ -134,7 +157,8 @@ scene.use('death', (data) => {
   playAgainBtn.addEventListener('click', goToMenu)
   
   scene.cleanup(() => {
-    deathModal.classList.add('hidden')
+    deathModal.open = false
+    // deathModal.classList.add('hidden')
     playAgainBtn.removeEventListener('click', goToMenu)
   })
 })
