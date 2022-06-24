@@ -23,38 +23,9 @@ const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
 
 
-function loadGame() {
-  loadUserForm()
-  deathModal.classList.add('hidden')
-  playAgainBtn.removeEventListener('click', replayGame)
-}
-
-const replayGame = () => {
-  loadUserForm()
-}
-
-const loadUserForm = () => {
-  usernameForm.style.display = 'block'
-  usernameForm.addEventListener('submit', e => {
-    e.preventDefault()
-    socket.emit('join game', usernameInput.value)
-    console.log("Requesting to join", usernameInput.value)
-    usernameInput.value = ''
-    usernameForm.style.display = 'none'
-    startCapturingInput()
-  })
-}
 
 
-const keys = []
-
-
-const playerInput = {
-  
-}
-const legalKeys = [87,65,83,68,38,37,40,39]
 const inputCode = { angle: 0 }
-
 function handleKeyDown(e) {
   if(e.keyCode === 87 || e.keyCode === 38) {
     inputCode.up = true
@@ -104,17 +75,73 @@ function stopCapturingInput() {
 }
 
 
+scene.use('menu', () => {
+  usernameForm.classList.remove('hidden')
+  
+  const checkForInput = e => {
+    e.preventDefault()
+    socket.emit('join game', usernameInput.value)
+    console.log("Requesting to join", usernameInput.value)
+    usernameInput.value = ''
+    scene.to('game')
+  }
+
+  usernameForm.addEventListener('submit', checkForInput)
+  
+  ctx.fillStyle = 'blue'
+  ctx.fillRect(0, 0, width, height)
+  
+  scene.cleanup(() => {
+    usernameForm.removeEventListener('submit', checkForInput)
+    usernameForm.classList.add('hidden')
+  })
+})
+
+scene.use('game', () => {
+  startCapturingInput()
+  
+  gameUpdates = []
+  firstServerTimestamp = 0
+  gameStart = 0
+  
+  socket.on('gameupdate', processGameUpdate)
+  socket.on('death', data => scene.to('death', data))
+  
+  // updated 60 times per second
+  scene.loop(() => {
+    const state = getCurrentState()
+    renderData(state)
+    if(state.me) {
+      inputCode.angle = Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
+      socket.emit('input', inputCode)
+    }
+  })
+  
+  // called when user is leaving scene
+  scene.cleanup(() => {
+    stopCapturingInput()
+    socket.off('death')
+  })
+})
+
+scene.use('death', (data) => {
+  deathModal.classList.remove('hidden')
+
+  deathModal.querySelector('div').innerText = "Shot by " + data.shotBy
+  
+  const goToMenu = () => scene.to('menu')
+  
+  playAgainBtn.addEventListener('click', goToMenu)
+  
+  scene.cleanup(() => {
+    deathModal.classList.add('hidden')
+    playAgainBtn.removeEventListener('click', goToMenu)
+  })
+})
 
 
 function draw() {
-  // console.log(getBaseUpdate())
-  const state = getCurrentState()
-  renderData(state)
-  if(state.me) {
-    inputCode.angle = Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
-
-    socket.emit('input', inputCode)
-  }
+  scene.run()
   window.requestAnimationFrame(draw)
 }
 
