@@ -3,6 +3,7 @@ Math.TWO_PI = Math.PI * 2
 const lerp = (a, b, c) => a + (b - a) * c
 
 const interpolateObject = (a, b, c) => {
+  if(!b) return
   const interp = {}
   for(var key in a) {
     if(key === 'angle') {
@@ -33,6 +34,4 @@ const interpolateAngle = (a, b, c) => {
   }else {
     return lerp(a, b, c)
   }
-
-  return angle * c
 }
