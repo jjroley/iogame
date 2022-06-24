@@ -1,12 +1,17 @@
 const { createServer } = require('http')
+const path = require('path')
 const { Server: SocketServer } = require('socket.io')
 const express = require('express')
 const { Game } = require('./server/game')
-
 const app = express()
 const server = createServer(app)
 
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, './client')))
+app.use(express.static(path.join(__dirname, './shared')))
+
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/client/views/index.html')
+})
 
 const io = new SocketServer(server)
 
