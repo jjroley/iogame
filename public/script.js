@@ -4,14 +4,13 @@ const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
 let width, height, scaleRatio = 1
-onResize()
 
 function onResize() {
   scaleRatio = Math.max(1, 800 / window.innerWidth)
   width = canvas.width = window.innerWidth * scaleRatio
   height = canvas.height = window.innerHeight * scaleRatio
 }
-
+onResize()
 window.onresize = onResize()
 
 let mouseX = 0, mouseY = 0;
@@ -21,8 +20,6 @@ const usernameInput = document.getElementById('username')
 const joinGameBtn = document.getElementById('join-btn')
 const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
-
-
 
 
 const inputCode = { angle: 0 }
@@ -73,6 +70,9 @@ function stopCapturingInput() {
   window.removeEventListener('click', handleClick)
   window.removeEventListener('mousemove', handleMouse)
 }
+
+
+const scene = new SceneHandler()
 
 
 scene.use('menu', () => {
@@ -139,10 +139,11 @@ scene.use('death', (data) => {
   })
 })
 
+// function draw() {
+//   
+//   window.requestAnimationFrame(draw)
+// }
 
-function draw() {
-  scene.run()
-  window.requestAnimationFrame(draw)
-}
+// window.requestAnimationFrame(draw)
 
-window.requestAnimationFrame(draw)
+scene.run()
