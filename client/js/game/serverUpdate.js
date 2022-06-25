@@ -42,8 +42,6 @@ class ServerUpdate {
     const base = this.getBaseUpdate();
     const serverTime = this.currentServerTime();
   
-    // If base is the most recent update we have, use its state.
-    // Otherwise, interpolate between its state and the state of (base + 1).
     if (base < 0 || base === this.gameUpdates.length - 1) {
       return this.gameUpdates[this.gameUpdates.length - 1];
     } else {

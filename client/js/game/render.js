@@ -122,14 +122,6 @@ export const wrap = (cb) => {
   ctx.restore()
 }
 
-// const dist = (x1, y1, x2, y2) => {
-//   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-// }
-
-// const constrain = (num, a, b) => {
-//   return Math.min(Math.max(num, a), b)
-// }
-
 const grass = cache(360, 360, (can, ctx, w, h) => {
   for(var x = 0; x < 4; x += 1) {
     for(var y = 0; y < 4; y += 1) {

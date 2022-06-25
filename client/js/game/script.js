@@ -158,7 +158,7 @@ scene.use('death', (data) => {
   
   scene.cleanup(() => {
     deathModal.open = false
-    // deathModal.classList.add('hidden')
+    deathModal.classList.add('hidden')
     playAgainBtn.removeEventListener('click', goToMenu)
   })
 })
