@@ -63,3 +63,5 @@ class SceneHandler {
     this.__sceneCallbacks.forEach(cb => cb())
   }
 }
+
+export default SceneHandler

@@ -6,8 +6,8 @@ const path = require('path')
 module.exports = {
   mode: "development",
   entry: {
-    game: './client/js/index.js',
-    login: './client/js/login.js'
+    game: './client/js/game/index.js',
+    login: './client/js/login/login.js'
   },
   output: {
     filename: '[name].bundle.js',

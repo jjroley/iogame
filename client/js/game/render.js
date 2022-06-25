@@ -65,7 +65,7 @@ const cam = {
   }
 }
 
-const renderData = (data) => {
+export const renderData = (data) => {
   ctx.save()
   if(data.me) {
     cam.follow(data.me)
@@ -122,19 +122,13 @@ const wrap = (cb) => {
   ctx.restore()
 }
 
-const dist = (x1, y1, x2, y2) => {
-  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-}
+// const dist = (x1, y1, x2, y2) => {
+//   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+// }
 
-const constrain = (num, a, b) => {
-  return Math.min(Math.max(num, a), b)
-}
-
-const sDist = (px, py, rx, ry, rw, rh) => {
-  const x = constrain(px, rx, rx + rw)
-  const y = constrain(py, ry, ry + rh)
-  return dist(px, py, x, y)
-}
+// const constrain = (num, a, b) => {
+//   return Math.min(Math.max(num, a), b)
+// }
 
 const grass = cache(360, 360, (can, ctx, w, h) => {
   for(var x = 0; x < 4; x += 1) {

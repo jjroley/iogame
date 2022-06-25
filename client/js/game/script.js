@@ -1,3 +1,5 @@
+import SceneHandler from "./scene"
+
 
 const FONT = 'Titan One, sans-serif'
 
@@ -162,12 +164,5 @@ scene.use('death', (data) => {
     playAgainBtn.removeEventListener('click', goToMenu)
   })
 })
-
-// function draw() {
-//   
-//   window.requestAnimationFrame(draw)
-// }
-
-// window.requestAnimationFrame(draw)
 
 scene.run()
