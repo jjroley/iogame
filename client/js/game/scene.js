@@ -64,4 +64,6 @@ class SceneHandler {
   }
 }
 
-export default SceneHandler
+const scene = new SceneHandler()
+
+export default scene

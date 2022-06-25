@@ -1,13 +1,16 @@
-import SceneHandler from "./scene"
+import '../../css/style.css'
 
+import scene from "./scene"
+import { renderData, wrap, cam } from "./render"
+import server from './serverUpdate'
 
-const FONT = 'Titan One, sans-serif'
+export const FONT = 'Titan One, sans-serif'
 
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
+export const canvas = document.getElementById('canvas')
+export const ctx = canvas.getContext('2d')
 
-let width, height, scaleRatio = 1
-let mouseX = 0, mouseY = 0;
+export let width = 0, height, scaleRatio = 1
+export let mouseX = 0, mouseY = 0;
 
 function onResize() {
   scaleRatio = Math.max(1, 800 / window.innerWidth)
@@ -17,14 +20,10 @@ function onResize() {
 onResize()
 window.addEventListener('resize', onResize)
 
-
-
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
-const joinGameBtn = document.getElementById('join-btn')
 const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
-
 
 let inputCode = { angle: 0 }
 function handleKeyDown(e) {
@@ -56,7 +55,7 @@ function handleKeyUp(e) {
   }
 }
 function handleClick(e) {
-  socket.emit('shoot', e.mouseButton)
+  server.send('shoot', e.mouseButton)
 }
 function handleMouse(e) {
   mouseX = e.clientX * scaleRatio
@@ -75,9 +74,9 @@ function stopCapturingInput() {
   window.removeEventListener('mousemove', handleMouse)
 }
 
-
-const scene = new SceneHandler()
-
+server.connect().then(() => {
+  scene.to('menu')
+})
 
 scene.use('menu', () => {
   usernameForm.classList.remove('hidden')
@@ -85,7 +84,7 @@ scene.use('menu', () => {
 
   const checkForInput = e => {
     e.preventDefault()
-    socket.emit('join game', usernameInput.value)
+    server.send('join game', usernameInput.value)
     console.log("Requesting to join", usernameInput.value)
     usernameInput.value = ''
     scene.to('game')
@@ -113,39 +112,38 @@ scene.use('menu', () => {
 })
 
 scene.use('game', () => {
-
   inputCode = { angle: 0 }
   startCapturingInput()
   
-  gameUpdates = []
-  firstServerTimestamp = 0
-  gameStart = 0
+  server.reset()
 
   let blocks = []
-  
-  socket.on('gameupdate', processGameUpdate)
-  socket.on('death', data => scene.to('death', data))
-  socket.on('initialState', data => {
+
+  server.on('gameupdate', update => {
+    server.process(update)
+  })
+  server.on('death', data => scene.to('death', data))
+  server.on('initialState', data => {
     console.log(data)
     blocks = data.blocks
   })
   
   // updated 60 times per second
   scene.loop(() => {
-    const state = getCurrentState()
+    const state = server.getCurrentState()
     renderData({ ...state, blocks })
     if(state.me) {
       inputCode.angle = Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
-      socket.emit('input', inputCode)
+      server.send('input', inputCode)
     }
   })
   
   // called when user is leaving scene
   scene.cleanup(() => {
     stopCapturingInput()
-    socket.off('death')
-    socket.off('gameupdate')
-    socket.off('initialState')
+    server.off('death')
+    server.off('gameupdate')
+    server.off('initialState')
   })
 })
 

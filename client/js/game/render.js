@@ -1,4 +1,4 @@
-
+import { ctx, width, height, scaleRatio, mouseX, mouseY, FONT } from './script'
 
 const renderPlayer = player => {
 
@@ -52,7 +52,7 @@ const renderPlayer = player => {
 }
 
 
-const cam = {
+export const cam = {
   x: 0, y: 0,
   mouseX: 0,
   mouseY: 0,
@@ -101,7 +101,7 @@ export const renderData = (data) => {
   ctx.restore()
 }
 
-const cache = (w, h, cb, type) => {
+export const cache = (w, h, cb, type) => {
   const can = document.createElement('canvas')
   can.width = w
   can.height = h
@@ -116,7 +116,7 @@ const cache = (w, h, cb, type) => {
   return can
 }
 
-const wrap = (cb) => {
+export const wrap = (cb) => {
   ctx.save()
   cb()
   ctx.restore()

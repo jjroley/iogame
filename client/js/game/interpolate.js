@@ -2,7 +2,7 @@ Math.TWO_PI = Math.PI * 2
 
 const lerp = (a, b, c) => a + (b - a) * c
 
-const interpolateObject = (a, b, c) => {
+export const interpolateObject = (a, b, c) => {
   if(!b) return a
   const interp = {}
   for(var key in a) {
@@ -17,7 +17,7 @@ const interpolateObject = (a, b, c) => {
   return interp
 }
 
-const interpolateObjects = (a, b, c) => {
+export const interpolateObjects = (a, b, c) => {
   if(a.length !== b.length) return
   return a.map((_a, i) => interpolateObject(_a, b.find(p => p.id === _a.id), c))
 }

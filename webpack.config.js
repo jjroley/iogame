@@ -6,11 +6,20 @@ const path = require('path')
 module.exports = {
   mode: "development",
   entry: {
-    game: './client/js/game/index.js',
+    game: './client/js/game/script.js',
     login: './client/js/login/login.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    clean: true
   }
 }

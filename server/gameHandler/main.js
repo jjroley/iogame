@@ -2,6 +2,8 @@ const { Block } = require('../block')
 const { Bullet } = require('../bullet')
 const { Player } = require('../player')
 
+const { dist } = require('../../shared/collide')
+
 const GameHandler = function() {
   this.players = {}
   this.sockets = {}
