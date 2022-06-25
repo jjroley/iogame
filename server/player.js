@@ -42,12 +42,12 @@ class Player {
       if(!rectRectCollide(this.x, this.y, 60, 60, b.x, b.y, b.w, b.h)) continue;
       const blockedX = Math.abs(oldPos.y - b.y) * 2 < 60 + b.h
       const blockedY = Math.abs(oldPos.x - b.x) * 2 < 60 + b.w
-      if(blockedX || !blockedY) {
-        this.x = b.x + sign(this.x - b.x) * (60 + b.w) / 2
+      if(blockedX) {
+        this.x = b.x + sign(oldPos.x - b.x) * ((60 + b.w) / 2 + 0.1)
         this.xVel = 0
       }
-      if(blockedY || !blockedX) {
-        this.y = b.y + sign(this.y - b.y) * (60 + b.h) / 2
+      if(blockedY) {
+        this.y = b.y + sign(oldPos.y - b.y) * ((60 + b.h) / 2 + 0.1)
         this.yVel = 0
       }
     }
