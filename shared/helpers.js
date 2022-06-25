@@ -20,4 +20,4 @@ export const constrain = (num, a, b) => {
   return Math.min(Math.max(num, a), b)
 }
 
-module.exports = { throttle, lerp, dist, constrain }
+// module.exports = { throttle, lerp, dist, constrain }
