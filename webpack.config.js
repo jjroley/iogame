@@ -6,7 +6,7 @@ const path = require('path')
 module.exports = {
   entry: {
     game: './client/js/index.js',
-    login: './client/js/login/login.js'
+    login: './client/js/login.js'
   },
   output: {
     filename: '[name].bundle.js',

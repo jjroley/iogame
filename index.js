@@ -6,11 +6,17 @@ const GameHandler = require('./server/gameHandler')
 const app = express()
 const server = createServer(app)
 
-app.use(express.static(path.join(__dirname, './client')))
-app.use(express.static(path.join(__dirname, './shared')))
+// app.use(express.static(path.join(__dirname, './client')))
+// app.use(express.static(path.join(__dirname, './shared')))
+
+app.use(express.static('clientscripts'))
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/views/index.html')
+})
+
+app.get('/login', function(req, res) {
+  res.sendFile(__dirname + '/client/views/login.html')
 })
 
 const io = new SocketServer(server)
