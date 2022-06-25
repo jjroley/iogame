@@ -2,7 +2,7 @@ const { createServer } = require('http')
 const path = require('path')
 const { Server: SocketServer } = require('socket.io')
 const express = require('express')
-const { Game } = require('./server/game')
+const GameHandler = require('./server/gameHandler')
 const app = express()
 const server = createServer(app)
 
@@ -35,7 +35,7 @@ io.on('connection', socket => {
 
 server.listen(3000, () => console.log("Server up!"))
 
-const game = new Game()
+const game = new GameHandler()
 
 game.addBlock(-5, -5)
 game.addBlock(-4, -5)
