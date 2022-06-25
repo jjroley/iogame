@@ -9,7 +9,7 @@ const server = createServer(app)
 // app.use(express.static(path.join(__dirname, './client')))
 // app.use(express.static(path.join(__dirname, './shared')))
 
-app.use(express.static('clientscripts'))
+app.use(express.static('dist'))
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/views/index.html')
