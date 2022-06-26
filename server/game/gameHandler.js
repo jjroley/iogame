@@ -1,9 +1,9 @@
-const { Block } = require('../block')
-const { Bullet } = require('../bullet')
-const { Player } = require('../player')
-const { dist } = require('../../shared/collide')
+const { Block } = require('./block')
+const { Bullet } = require('./bullet')
+const { Player } = require('./player')
+const { dist } = require('../../shared/math')
 const { pointCenterRectCollide } = require('../../shared/collide')
-const { MAP_SIZE } = require('../../shared/constants')
+const { MAP_SIZE, BLOCK_SIZE } = require('../../shared/constants')
 
 const GameHandler = function() {
   this.players = {}
@@ -16,7 +16,7 @@ const GameHandler = function() {
 }
 
 GameHandler.prototype.addBlock = function(x, y) {
-  this.blocks.push(new Block(x * 90 - 45, y * 90 - 45, 90, 90))
+  this.blocks.push(new Block(x * BLOCK_SIZE, y * BLOCK_SIZE))
 }
 
 GameHandler.prototype.addPlayer = function(socket, username) {

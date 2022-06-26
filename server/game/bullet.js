@@ -1,5 +1,5 @@
 const shortid = require('shortid')
-const { pointCenterRectCollide } = require('../shared/collide')
+const { pointCenterRectCollide } = require('../../shared/collide')
 
 class Bullet {
   constructor(playerId, x, y, angle) {

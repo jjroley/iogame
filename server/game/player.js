@@ -1,7 +1,9 @@
-const { rectRectCollide } = require('../shared/collide')
+const { rectRectCollide } = require('../../shared/collide')
 
 const constrain = (a, b, c) => a < b ? b : a > c ? c : a
 const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
+
+const { MAP_SIZE, PLAYER_SIZE } = require('../../shared/constants')
 
 class Player {
   constructor(id, username, x, y) {
@@ -34,42 +36,25 @@ class Player {
 
     const oldPos = { x: this.x, y: this.y }
 
-    
     this.x += this.xVel * dt
     this.y += this.yVel * dt
 
     for(const b of blocks) {
-      if(!rectRectCollide(this.x, this.y, 60, 60, b.x, b.y, b.w, b.h)) continue;
-      const blockedX = Math.abs(oldPos.y - b.y) * 2 < 60 + b.h
-      const blockedY = Math.abs(oldPos.x - b.x) * 2 < 60 + b.w
+      if(!rectRectCollide(this.x, this.y, PLAYER_SIZE, PLAYER_SIZE, b.x, b.y, b.w, b.h)) continue;
+      const blockedX = Math.abs(oldPos.y - b.y) * 2 < PLAYER_SIZE + b.h
+      const blockedY = Math.abs(oldPos.x - b.x) * 2 < PLAYER_SIZE + b.w
       if(blockedX) {
-        this.x = b.x + sign(oldPos.x - b.x) * ((60 + b.w) / 2 + 0.1)
+        this.x = b.x + sign(oldPos.x - b.x) * ((PLAYER_SIZE + b.w) / 2 + 0.1)
         this.xVel = 0
       }
       if(blockedY) {
-        this.y = b.y + sign(oldPos.y - b.y) * ((60 + b.h) / 2 + 0.1)
+        this.y = b.y + sign(oldPos.y - b.y) * ((PLAYER_SIZE + b.h) / 2 + 0.1)
         this.yVel = 0
       }
     }
 
-    if(this.x < -970) {
-      this.x = -970
-      this.xVel = 0
-    }
-    if(this.x > 970) {
-      this.x = 970
-      this.xVel = 0
-    }
-    if(this.y < -970) {
-      this.y = -970
-      this.yVel = 0
-    }
-    if(this.y > 970) {
-      this.y = 970
-      this.yVel = 0
-    }
-    // this.x = constrain(this.x, -970, 970)
-    // this.y = constrain(this.y, -970, 970)
+    this.x = constrain(this.x, -MAP_SIZE / 2, MAP_SIZE / 2)
+    this.y = constrain(this.y, -MAP_SIZE / 2, MAP_SIZE / 2)
   }
   getData() {
     return {
