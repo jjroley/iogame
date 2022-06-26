@@ -1,9 +1,11 @@
-import { ctx, width, height, scaleRatio, mouseX, mouseY, FONT } from './script'
+// import { ctx, width, height, scaleRatio, mouseX, mouseY, FONT } from './script'
+
+import canvas, { cache } from './canvas'
 
 const renderPlayer = player => {
 
   // display player
-  wrap(() => {
+  canvas.wrap((_, ctx) => {
     ctx.translate(player.x, player.y)
     ctx.rotate(player.angle)
     ctx.fillStyle = 'rgb(255, 179, 0)'
@@ -24,7 +26,7 @@ const renderPlayer = player => {
   })
 
   // draw health bar
-  wrap(() => {
+  canvas.wrap((_, ctx) => {
     ctx.fillStyle = 'transparent'
     ctx.strokeStyle = 'white'
     ctx.beginPath()
@@ -41,7 +43,7 @@ const renderPlayer = player => {
   })
 
   // display name
-  wrap(() => {
+  canvas.wrap((_, ctx) => {
     ctx.beginPath()
     ctx.fillStyle = 'white'
     ctx.font = `30px ${FONT}`
@@ -66,61 +68,44 @@ export const cam = {
 }
 
 export const renderData = (data) => {
-  ctx.save()
-  if(data.me) {
-    cam.follow(data.me)
-    ctx.save()
-    ctx.fillStyle = grass
-    ctx.fillRect(cam.x, cam.y, width, height)
-    ctx.restore()
-    renderPlayer(data.me)
-  }
-  if(data.others) {
-    data.others.forEach(renderPlayer)
-  }
-  if(data.bullets) {
-    // console.log(data.bullets)
-    data.bullets.forEach(bullet => {
+  canvas.wrap((_, ctx) => {
+    if(data.me) {
+      cam.follow(data.me)
+      ctx.save()
+      ctx.fillStyle = grass
+      ctx.fillRect(cam.x, cam.y, width, height)
+      ctx.restore()
+      renderPlayer(data.me)
+    }
+    if(data.others) {
+      data.others.forEach(renderPlayer)
+    }
+    if(data.bullets) {
+      // console.log(data.bullets)
+      data.bullets.forEach(bullet => {
+        ctx.fillStyle = 'gray'
+        ctx.beginPath()
+        ctx.ellipse(bullet.x, bullet.y, 5, 5, 0, 0, Math.PI * 2)
+        ctx.fill()
+      })
+    }
+    wrap(() => {
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 10
+      ctx.strokeRect(-1000, -1000, 2000, 2000)
+    })
+    if(data.blocks) {
       ctx.fillStyle = 'gray'
-      ctx.beginPath()
-      ctx.ellipse(bullet.x, bullet.y, 5, 5, 0, 0, Math.PI * 2)
-      ctx.fill()
-    })
-  }
-  wrap(() => {
-    ctx.strokeStyle = 'black'
-    ctx.lineWidth = 10
-    ctx.strokeRect(-1000, -1000, 2000, 2000)
+      data.blocks.forEach(b => {
+        ctx.fillRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h)
+      })
+    }
+    ctx.restore()
   })
-  if(data.blocks) {
-    ctx.fillStyle = 'gray'
-    data.blocks.forEach(b => {
-      ctx.fillRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h)
-    })
-  }
-  ctx.restore()
+  
 }
 
-export const cache = (w, h, cb, type) => {
-  const can = document.createElement('canvas')
-  can.width = w
-  can.height = h
-  const ctx = can.getContext('2d')
-  cb(can, ctx, w, h)
-  if(type === 'pattern') {
-    const pattern = ctx.createPattern(can, 'repeat')
-    pattern.width = w
-    pattern.height = h
-    return pattern
-  }
-  return can
-}
 
-export const wrap = (cb) => {
-  ctx.save()
-  cb()
-  ctx.restore()
-}
 
 const grass = cache(360, 360, (can, ctx, w, h) => {
   for(var x = 0; x < 4; x += 1) {
