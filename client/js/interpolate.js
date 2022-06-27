@@ -1,6 +1,6 @@
 Math.TWO_PI = Math.PI * 2
 
-import { lerp } from '../../../shared/math'
+import { lerp } from '../../shared/math'
 
 export const interpolateObject = (a, b, c) => {
   if(!b) return a

@@ -6,8 +6,7 @@ const path = require('path')
 module.exports = {
   mode: "development",
   entry: {
-    game: './client/js/game/script.js',
-    login: './client/js/login/login.js'
+    game: './client/js/script.js'
   },
   module: {
     rules: [

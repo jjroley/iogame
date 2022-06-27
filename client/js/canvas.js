@@ -1,5 +1,11 @@
 
 
+CanvasRenderingContext2D.prototype.wrap = function(cb) {
+  this.save()
+  cb()
+  this.restore()
+}
+
 class Canvas {
   constructor(id) {
     this.canvas = document.querySelector(id || "canvas")
@@ -21,12 +27,11 @@ class Canvas {
       this.mouseY = e.clientY * this.scaleRatio
     })
   }
-  wrap(cb) {
+  graphics(cb) {
     this.ctx.save()
-    cb(this.canvas, this.ctx)
+    cb(this.ctx, this.canvas)
     this.ctx.restore()
   }
-  
 }
 
 

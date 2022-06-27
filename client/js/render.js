@@ -5,7 +5,9 @@ import { cam } from './camera'
 const renderPlayer = player => {
 
   // display player
-  canvas.wrap((_, ctx) => {
+  canvas.graphics((ctx) => {
+
+    ctx.save()
     ctx.translate(player.x, player.y)
     ctx.rotate(player.angle)
     ctx.fillStyle = 'rgb(255, 179, 0)'
@@ -23,10 +25,10 @@ const renderPlayer = player => {
     ctx.ellipse(30, -30, 10, 10, 0, 0, Math.TWO_PI)
     ctx.fill()
     ctx.stroke()
-  })
+    ctx.restore()
 
-  // draw health bar
-  canvas.wrap((_, ctx) => {
+    // health bar
+    ctx.save()
     ctx.fillStyle = 'transparent'
     ctx.strokeStyle = 'white'
     ctx.beginPath()
@@ -40,21 +42,20 @@ const renderPlayer = player => {
     ctx.beginPath()
     ctx.rect(player.x - 50, player.y - 50, player.health, 10)
     ctx.fill()
-  })
-
-  // display name
-  canvas.wrap((_, ctx) => {
-    ctx.beginPath()
+    ctx.restore()
+    
+    ctx.save()
     ctx.fillStyle = 'white'
     ctx.font = `30px sans-serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(player.username, player.x, player.y - 70)
+    ctx.restore()
   })
 }
 
 export const renderData = (data) => {
-  canvas.wrap((_, ctx) => {
+  canvas.graphics((ctx) => {
     if(data.me) {
       cam.follow(data.me, ctx)
       ctx.save()

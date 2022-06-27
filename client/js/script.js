@@ -1,4 +1,4 @@
-import '../../css/style.css'
+import '../css/style.css'
 import scene from "./scene"
 import { renderData } from "./render"
 import server from './serverUpdate'
@@ -72,7 +72,7 @@ scene.use('menu', () => {
   usernameForm.addEventListener('submit', checkForInput)
 
   scene.resize(() => {
-    canvas.wrap((_, ctx) => {
+    canvas.graphics((ctx) => {
       ctx.fillStyle = '#0a0'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       ctx.textAlign = 'center'
