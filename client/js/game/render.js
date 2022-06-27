@@ -1,6 +1,6 @@
-// import { ctx, width, height, scaleRatio, mouseX, mouseY, FONT } from './script'
 
-import canvas, { cache } from './canvas'
+import { canvas, cache } from './canvas'
+import { cam } from './camera'
 
 const renderPlayer = player => {
 
@@ -46,34 +46,20 @@ const renderPlayer = player => {
   canvas.wrap((_, ctx) => {
     ctx.beginPath()
     ctx.fillStyle = 'white'
-    ctx.font = `30px ${FONT}`
+    ctx.font = `30px sans-serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(player.username, player.x, player.y - 70)
   })
 }
 
-
-export const cam = {
-  x: 0, y: 0,
-  mouseX: 0,
-  mouseY: 0,
-  follow(player) {
-    this.x = player.x - width / 2
-    this.y = player.y - height / 2
-    this.mouseX = mouseX + this.x
-    this.mouseY = mouseY + this.y
-    ctx.translate(~~-this.x, ~~-this.y)
-  }
-}
-
 export const renderData = (data) => {
   canvas.wrap((_, ctx) => {
     if(data.me) {
-      cam.follow(data.me)
+      cam.follow(data.me, ctx)
       ctx.save()
       ctx.fillStyle = grass
-      ctx.fillRect(cam.x, cam.y, width, height)
+      ctx.fillRect(cam.x, cam.y, canvas.width, canvas.height)
       ctx.restore()
       renderPlayer(data.me)
     }
@@ -81,7 +67,6 @@ export const renderData = (data) => {
       data.others.forEach(renderPlayer)
     }
     if(data.bullets) {
-      // console.log(data.bullets)
       data.bullets.forEach(bullet => {
         ctx.fillStyle = 'gray'
         ctx.beginPath()
@@ -89,11 +74,11 @@ export const renderData = (data) => {
         ctx.fill()
       })
     }
-    wrap(() => {
-      ctx.strokeStyle = 'black'
-      ctx.lineWidth = 10
-      ctx.strokeRect(-1000, -1000, 2000, 2000)
-    })
+    ctx.save()
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 10
+    ctx.strokeRect(-1000, -1000, 2000, 2000)
+    ctx.restore()
     if(data.blocks) {
       ctx.fillStyle = 'gray'
       data.blocks.forEach(b => {

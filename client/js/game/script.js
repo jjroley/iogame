@@ -1,24 +1,9 @@
 import '../../css/style.css'
-
 import scene from "./scene"
-import { renderData, wrap, cam } from "./render"
+import { renderData } from "./render"
 import server from './serverUpdate'
-
-export const FONT = 'Titan One, sans-serif'
-
-export const canvas = document.getElementById('canvas')
-export const ctx = canvas.getContext('2d')
-
-export let width = 0, height, scaleRatio = 1
-export let mouseX = 0, mouseY = 0;
-
-function onResize() {
-  scaleRatio = Math.max(1, 800 / window.innerWidth)
-  width = canvas.width = window.innerWidth * scaleRatio
-  height = canvas.height = window.innerHeight * scaleRatio
-}
-onResize()
-window.addEventListener('resize', onResize)
+import { canvas } from './canvas'
+import { cam } from './camera'
 
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
@@ -57,21 +42,15 @@ function handleKeyUp(e) {
 function handleClick(e) {
   server.send('shoot', e.mouseButton)
 }
-function handleMouse(e) {
-  mouseX = e.clientX * scaleRatio
-  mouseY = e.clientY * scaleRatio
-}
 function startCapturingInput() {
   window.addEventListener('keydown', handleKeyDown)
   window.addEventListener('keyup', handleKeyUp)
   window.addEventListener('click', handleClick)
-  window.addEventListener('mousemove', handleMouse)
 }
 function stopCapturingInput() {
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('keyup', handleKeyUp)
   window.removeEventListener('click', handleClick)
-  window.removeEventListener('mousemove', handleMouse)
 }
 
 server.connect().then(() => {
@@ -93,15 +72,14 @@ scene.use('menu', () => {
   usernameForm.addEventListener('submit', checkForInput)
 
   scene.resize(() => {
-    ctx.fillStyle = '#0a0'
-    ctx.fillRect(0, 0, width, height)
-  
-    wrap(() => {
+    canvas.wrap((_, ctx) => {
+      ctx.fillStyle = '#0a0'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.font = `100px ${FONT}`
+      ctx.font = `100px sans-serif`
       ctx.fillStyle = 'white'
-      ctx.fillText("Paintball.io", width / 2, height / 4)
+      ctx.fillText("Paintball.io", canvas.width / 2, canvas.height / 4)
     })
   })
   
