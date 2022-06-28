@@ -3,6 +3,8 @@ const path = require('path')
 const { Server: SocketServer } = require('socket.io')
 const express = require('express')
 const GameHandler = require('./server/game/gameHandler')
+const { placeTileData, placedTiles } = require('./server/game/tileData')
+
 const app = express()
 const server = createServer(app)
 
@@ -43,12 +45,8 @@ server.listen(3000, () => console.log("Server up!"))
 
 const game = new GameHandler()
 
-game.addBlock(-5, -5)
-game.addBlock(-4, -5)
-game.addBlock(-3, -5)
-game.addBlock(-2, -5)
-game.addBlock(-1, -5)
-game.addBlock(-0, -5)
-game.addBlock(0, -6)
-game.addBlock(0, -7)
+placeTileData(0, 3, 1)
+placeTileData(1, 3, 1)
+placeTileData(2, 3, 1)
+placeTileData(2, 4, 1)
 

@@ -1,7 +1,10 @@
 
 import { canvas, cache } from './canvas'
 import { cam } from './camera'
-import { BLOCK_SIZE, MAP_SIZE } from '../../shared/constants'
+import { BLOCK_SIZE, MAP_H, MAP_W, PLAYER_SIZE } from '../../shared/constants'
+
+
+const PLAYER_SCALE = PLAYER_SIZE / 60
 
 const renderPlayer = player => {
 
@@ -10,6 +13,7 @@ const renderPlayer = player => {
 
     ctx.save()
     ctx.translate(player.x, player.y)
+    ctx.scale(PLAYER_SCALE, PLAYER_SCALE)
     ctx.rotate(player.angle)
     ctx.fillStyle = 'rgb(255, 179, 0)'
     ctx.strokeStyle = 'rgb(200, 130, 0)'
@@ -55,12 +59,22 @@ const renderPlayer = player => {
   })
 }
 
+const renderTile = tile => {
+  canvas.graphics((ctx) => {
+    ctx.fillStyle = brick
+    ctx.fillRect(tile[0] * BLOCK_SIZE, tile[1] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+  })
+}
+
+
 export const renderData = (data) => {
   canvas.graphics((ctx) => {
+    data.me && cam.follow(data.me, ctx)
+
     ctx.fillStyle = grass
     ctx.fillRect(cam.x, cam.y, canvas.width, canvas.height)
+
     if(data.me) {
-      cam.follow(data.me, ctx)
       renderPlayer(data.me)
     }
     if(data.others) {
@@ -74,20 +88,15 @@ export const renderData = (data) => {
         ctx.fill()
       })
     }
-    if(data.blocks) {
-      ctx.fillStyle = 'gray'
-      data.blocks.forEach(b => {
-        ctx.fillRect(b.x * BLOCK_SIZE, b.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-      })
+    if(data.tiles) {
+      data.tiles.forEach(renderTile)
     }
-  })
 
-  // map boundary
-  canvas.graphics((ctx) => {
+    // map boundary
     ctx.save()
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 10
-    ctx.strokeRect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE)
+    ctx.strokeRect(0, 0, MAP_W, MAP_H)
     ctx.restore()
   })
 }
@@ -102,4 +111,14 @@ const grass = cache(BLOCK_SIZE * 4, BLOCK_SIZE * 4, (can, ctx) => {
       ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
     }
   }
+}, 'pattern')
+
+const brick = cache(BLOCK_SIZE, BLOCK_SIZE, (can, ctx) => {
+  ctx.scale(BLOCK_SIZE / 100, BLOCK_SIZE / 100)
+  ctx.fillStyle = '#777'
+  ctx.fillRect(0, 0, 100, 100)
+  ctx.fillStyle = '#333'
+  ctx.fillRect(0, 5, 45, 40)
+  ctx.fillRect(55, 5, 45, 40)
+  ctx.fillRect(5, 55, 90, 40)
 }, 'pattern')

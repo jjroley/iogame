@@ -17,7 +17,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js && webpack --config webpack.config.js -w",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "build:dev": "webpack --config webpack.config.js -w"
   },
   "keywords": [],
   "author": "",

@@ -95,20 +95,20 @@ scene.use('game', () => {
   
   server.reset()
 
-  let blocks = []
+  let tiles = []
 
   server.on('gameupdate', update => {
     server.processUpdate(update) 
   })
   server.on('death', data => scene.to('death', data))
   server.on('initialState', data => {
-    blocks = data.blocks
+    tiles = data.tiles
   })
   
   // updated 60 times per second
   scene.loop(() => {
     const state = server.getCurrentState()
-    renderData({ ...state, blocks })
+    renderData({ ...state, tiles })
     if(state.me) {
       inputCode.angle = Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
       server.send('input', inputCode)

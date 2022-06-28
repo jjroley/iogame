@@ -8,7 +8,7 @@ class Block {
     this.h = h
   }
   getData() {
-    return { x: this.x, y: this.y, w: this.w, h: this.h }
+    return { x: this.x, y: this.y }
   }
 }
 

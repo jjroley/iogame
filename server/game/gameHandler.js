@@ -3,7 +3,8 @@ const { Bullet } = require('./bullet')
 const { Player } = require('./player')
 const { dist } = require('../../shared/math')
 const { pointCenterRectCollide } = require('../../shared/collide')
-const { MAP_SIZE, BLOCK_SIZE } = require('../../shared/constants')
+const { MAP_SIZE, MAP_W, MAP_H } = require('../../shared/constants')
+const { placedTiles } = require('./tileData')
 
 const GameHandler = function() {
   this.players = {}
@@ -16,7 +17,7 @@ const GameHandler = function() {
 }
 
 GameHandler.prototype.addBlock = function(x, y) {
-  this.blocks.push(new Block(x * BLOCK_SIZE, y * BLOCK_SIZE))
+  this.blocks.push(new Block(x, y))
 }
 
 GameHandler.prototype.addPlayer = function(socket, username) {
@@ -40,7 +41,7 @@ GameHandler.prototype.handleInput = function(id, input) {
 
 GameHandler.prototype.sendInitialState = function(socket) {
   socket.emit('initialState', { 
-    blocks: this.blocks.map(b => b.getData()) 
+    tiles: placedTiles
   })
 }
 
@@ -76,13 +77,8 @@ GameHandler.prototype.update = function() {
       }
     })
 
-    // handle collisions with blocks
-    bullet.handleCollide(this.blocks)
-
-    // destory if bullet goes outside map
-    if(!pointCenterRectCollide(bullet.x, bullet.y, 0, 0, MAP_SIZE, MAP_SIZE)) {
-      bullet.dead = true
-    }
+    // handle collisions
+    bullet.handleCollide()
 
     // remove bullet from array if it is dead
     if(bullet.dead) {
