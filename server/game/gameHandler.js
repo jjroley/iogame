@@ -1,13 +1,14 @@
 const { Block } = require('./block')
-const { Bullet } = require('./bullet')
-const { Player } = require('./player')
+const { Bullet, bulletHandler } = require('./bullet')
+const { Player, playerHandler } = require('./player')
 const { dist } = require('../../shared/math')
 const { pointCenterRectCollide } = require('../../shared/collide')
 const { MAP_SIZE, MAP_W, MAP_H } = require('../../shared/constants')
 const { placedTiles } = require('./tileData')
 
+
 const GameHandler = function() {
-  this.players = {}
+  // this.players = {}
   this.sockets = {}
   this.bullets = []
   this.blocks = []
@@ -21,22 +22,21 @@ GameHandler.prototype.addBlock = function(x, y) {
 }
 
 GameHandler.prototype.addPlayer = function(socket, username) {
-  const x = ~~(Math.random() * MAP_SIZE - MAP_SIZE / 2)
-  const y = ~~(Math.random() * MAP_SIZE - MAP_SIZE / 2)
-  this.players[socket.id] = new Player(socket.id, username, x, y) 
+  const x = MAP_W / 2 + Math.random() * 400 - 200
+  const y = MAP_H / 2 + Math.random() * 400 - 200
+  playerHandler.add(socket.id, username, x, y)
+  // this.players[socket.id] = new Player(socket.id, username, x, y) 
   this.sockets[socket.id] = socket
   this.sendInitialState(socket)
 }
 
 GameHandler.prototype.removePlayer = function(id) {
-  delete this.players[id]
+  playerHandler.remove(id)
   delete this.sockets[id]
 }
 
 GameHandler.prototype.handleInput = function(id, input) {
-  const player = this.players[id]
-  if(!player) return
-  player.handleInput(input)
+  playerHandler.sendInput(id, input)
 }
 
 GameHandler.prototype.sendInitialState = function(socket) {
@@ -45,59 +45,21 @@ GameHandler.prototype.sendInitialState = function(socket) {
   })
 }
 
-GameHandler.prototype.shoot = function(id) {
-  const player = this.players[id]
-  if(!player) return
-  this.bullets.push(new Bullet(id, player.x, player.y, player.angle))
-}
-
 GameHandler.prototype.update = function() {
   const now = Date.now()
   const dt = (now - this.lastUpdate) / 1000
   this.lastUpdate = now
 
-  // update bullets
-  for(var i = this.bullets.length - 1; i >= 0; i--) {
-    const bullet = this.bullets[i]
-
-    // handle collisions with players
-    Object.values(this.players).forEach(player => {
-      if(bullet.playerId === player.id) return
-      if(dist(bullet.x, bullet.y, player.x, player.y) < 30) {
-        player.xVel += bullet.xVel * bullet.speed
-        player.yVel += bullet.yVel * bullet.speed
-        player.health -= 20
-        bullet.dead = true
-        if(player.health <= 0) {
-          this.sockets[player.id].emit("death", {
-            shotBy: this.players[bullet.playerId].username
-          })
-          this.removePlayer(player.id)
-        }
-      }
-    })
-
-    // handle collisions
-    bullet.handleCollide()
-
-    // remove bullet from array if it is dead
-    if(bullet.dead) {
-      this.bullets.splice(i, 1)
-      continue;
-    }
-
-    this.bullets[i].update(dt)
-  }
-
   // update players
-  Object.values(this.players).forEach(player => {
-    player.update(dt, this.blocks)
-  })
+  playerHandler.update(dt)
+
+  // update bullets
+  bulletHandler.update(dt)
 
   // only sends an update every other frame
   if(this.sendUpdate) {
-    for(const key in this.players) {
-      const player = this.players[key]
+    for(const key in playerHandler.players) {
+      const player = playerHandler.players[key]
       this.sockets[key].emit('gameupdate', this.buildUpdate(player))
     }
   }
@@ -105,8 +67,8 @@ GameHandler.prototype.update = function() {
 }
 
 GameHandler.prototype.buildUpdate = function(player) {
-  const others = Object.values(this.players).filter(p => p !== player).map(p => p.getData())
-  const bullets = this.bullets.map(bullet => bullet.getData())
+  const others = Object.values(playerHandler.players).filter(p => p !== player).map(p => p.getData())
+  const bullets = bulletHandler.bullets.map(bullet => bullet.getData())
 
   return {
     timestamp: Date.now(),

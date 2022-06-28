@@ -10,7 +10,7 @@ const usernameInput = document.getElementById('username')
 const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
 
-let inputCode = { angle: 0 }
+let inputCode = {}
 function handleKeyDown(e) {
   if(e.keyCode === 87 || e.keyCode === 38) {
     inputCode.up = true
@@ -24,6 +24,7 @@ function handleKeyDown(e) {
   if(e.keyCode === 68 || e.keyCode === 39) {
     inputCode.right = true
   }
+  server.send('input', { type: 'move', keys: inputCode })
 }
 function handleKeyUp(e) {
   if(e.keyCode === 87 || e.keyCode === 38) {
@@ -38,9 +39,10 @@ function handleKeyUp(e) {
   if(e.keyCode === 68 || e.keyCode === 39) {
     inputCode.right = false
   }
+  server.send('input', { type: 'move', keys: inputCode })
 }
 function handleClick(e) {
-  server.send('shoot', e.mouseButton)
+  server.send('input', { type: 'attack' })
 }
 function startCapturingInput() {
   window.addEventListener('keydown', handleKeyDown)
@@ -90,7 +92,7 @@ scene.use('menu', () => {
 })
 
 scene.use('game', () => {
-  inputCode = { angle: 0 }
+  inputCode = {}
   startCapturingInput()
   
   server.reset()
@@ -110,8 +112,10 @@ scene.use('game', () => {
     const state = server.getCurrentState()
     renderData({ ...state, tiles })
     if(state.me) {
-      inputCode.angle = Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
-      server.send('input', inputCode)
+      server.send('input', { 
+        type: "angle",
+        angle: Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
+      })
     }
   })
   

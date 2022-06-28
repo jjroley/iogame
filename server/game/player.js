@@ -4,6 +4,7 @@ const constrain = (a, b, c) => a < b ? b : a > c ? c : a
 const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
 
 const { MAP_W, MAP_H, PLAYER_SIZE } = require('../../shared/constants')
+const { bulletHandler } = require('./bullet')
 
 class Player {
   constructor(id, username, x, y) {
@@ -20,11 +21,26 @@ class Player {
     this.slowdown = 0.9
     this.health = 100
     this.moveState = {}
+    this.teamId = null
+    this.rank = 0
+    this.attackCooldown = 0
+    this.attackRate = 1
   }
   handleInput(input) {
-    this.moveState = input
+    if(input.type === 'attack') {
+      if(this.attackCooldown < this.attackRate) return
+      bulletHandler.add(this.id, this.x, this.y, this.angle)
+      this.attackCooldown = 0
+    }else if(input.type === 'move') {
+      this.moveState = input.keys
+    }else if(input.type === 'angle') {
+      this.angle = input.angle
+    }
   }
   update(dt, blocks) {
+
+    this.attackCooldown = Math.min(this.attackCooldown + dt, this.attackRate)
+
     if(this.moveState.up) this.yVel = Math.max(this.yVel - this.accel, -this.speed)
     else if(this.moveState.down) this.yVel = Math.min(this.yVel + this.accel, this.speed)
     else this.yVel *= this.slowdown
@@ -33,17 +49,13 @@ class Player {
     else if(this.moveState.right) this.xVel = Math.min(this.xVel + this.accel, this.speed)
     else this.xVel *= this.slowdown
 
-    this.angle = this.moveState.angle
-
     const oldPos = { x: this.x, y: this.y }
 
     this.x += this.xVel * dt
     this.y += this.yVel * dt
 
     if(tileCollide(this.x, this.y, this.w, this.h)) {
-      console.log('co')
       if(!tileCollide(oldPos.x, oldPos.y, this.w, this.h)) {
-        console.log('bi')
         const blockedY = tileCollide(oldPos.x, this.y, this.w, this.h)
         const blockedX = tileCollide(this.x, oldPos.y, this.w, this.h)
         if(blockedX) {
@@ -81,9 +93,33 @@ class Player {
       y: this.y,
       angle: this.angle,
       health: this.health,
-      username: this.username
+      username: this.username,
+      teamId: this.teamId,
+      rank: this.rank
     }
   }
 }
 
-module.exports = { Player }
+const playerHandler = {
+  players: {},
+  add(id, username, x, y) {
+    this.players[id] = new Player(id, username, x, y)
+  },
+  remove(id) {
+    delete this.players[id]
+  },
+  sendInput(id, input) {
+    const player = this.players[id]
+    if(!player) return
+    player.handleInput(input)
+  },
+  update(dt) {
+    let arr = Object.values(this.players)
+    for(let i = arr.length - 1; i >= 0; i--) {
+      const player = arr[i]
+      player.update(dt)
+    }
+  }
+}
+
+module.exports = { Player, playerHandler }
