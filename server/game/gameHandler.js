@@ -8,7 +8,6 @@ const { placedTiles } = require('./tileData')
 
 
 const GameHandler = function() {
-  this.bullets = []
   this.blocks = []
   this.lastUpdate = Date.now()
   this.sendUpdate = true
@@ -29,7 +28,6 @@ GameHandler.prototype.addPlayer = function(socket, username) {
 GameHandler.prototype.removePlayer = function(id) {
   playerHandler.remove(id)
 }
-
 
 GameHandler.prototype.handleInput = function(id, input) {
   playerHandler.sendInput(id, input)

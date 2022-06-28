@@ -1,13 +1,13 @@
 
 import { canvas, cache } from './canvas'
 import { cam } from './camera'
-import { BLOCK_SIZE, MAP_H, MAP_W, PLAYER_SIZE } from '../../shared/constants'
+import { BLOCK_SIZE, MAP_H, MAP_W, PLAYER_STATS } from '../../shared/constants'
 
 
-const PLAYER_SCALE = PLAYER_SIZE / 60
+
 
 const renderPlayer = player => {
-
+  const PLAYER_SCALE = player.size / 60
   // display player
   canvas.graphics((ctx) => {
 
@@ -22,15 +22,24 @@ const renderPlayer = player => {
     ctx.ellipse(0, 0, 30, 30, 0, 0, Math.TWO_PI)
     ctx.fill()
     ctx.stroke()
-    ctx.beginPath()
-    ctx.ellipse(30, 30, 10, 10, 0, 0, Math.TWO_PI)
-    ctx.fill()
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.ellipse(30, -30, 10, 10, 0, 0, Math.TWO_PI)
-    ctx.fill()
-    ctx.stroke()
+
+
+    // console.log(player)
+
+    const weapon = PLAYER_STATS[player.rank].weapon
+    if(weapon === 'fists' || weapon === 'giantFists') {
+      ctx.beginPath()
+      ctx.ellipse(30 + player.cooldown * 10, 30 - player.cooldown * 10, 10, 10, 0, 0, Math.TWO_PI)
+      ctx.fill()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.ellipse(30 + player.cooldown * 10, -30 + player.cooldown * 10, 10, 10, 0, 0, Math.TWO_PI)
+      ctx.fill()
+      ctx.stroke()
+    }
+
     ctx.restore()
+
 
     // health bar
     ctx.save()

@@ -2,8 +2,7 @@ const { rectRectCollide } = require('../../shared/collide')
 const { tileCollide } = require('./tileData')
 const constrain = (a, b, c) => a < b ? b : a > c ? c : a
 const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
-
-const { MAP_W, MAP_H, PLAYER_SIZE, PLAYER_STATS } = require('../../shared/constants')
+const { MAP_W, MAP_H, PLAYER_SIZE, PLAYER_STATS, WEAPON_STATS } = require('../../shared/constants')
 const { bulletHandler } = require('./bullet')
 const { dist } = require('../../shared/math')
 
@@ -25,9 +24,8 @@ class Player {
     this.moveState = {}
     this.teamId = null
     this.rank = 0
-    this.attackCooldown = 0
-    this.attackRate = 1
     this.coins = 1000000
+    this.attackCooldown = 0
     this.purchasedCharacters = []
     this.purchaseCharacter(0)
     this.changeCharacter(0)
@@ -36,9 +34,9 @@ class Player {
     if(character >= PLAYER_STATS.length) return
     if(!this.purchasedCharacters.includes(character)) return
     const stats = PLAYER_STATS[character]
+    this.weapon = WEAPON_STATS[stats.weapon]
     this.health *= this.maxHealth / stats.health
     this.maxHealth = stats.health
-    this.attackRate = stats.cooldown
     if(stats.size) {
       this.w = this.h = stats.size
     }else {
@@ -46,7 +44,7 @@ class Player {
     }
     this.speed = stats.speed
     this.rank = character
-    console.log("Changed to " + character, this.speed, this.w)
+    console.log("Changed to " + character, this.speed, this.w, stats.name)
   }
   purchaseCharacter(character) {
     if(character >= PLAYER_STATS.length) return
@@ -55,34 +53,67 @@ class Player {
     this.purchasedCharacters.push(character)
     this.coins -= PLAYER_STATS[character].cost
   }
+  handleAttack() {
+    if(this.attackCooldown < this.weapon.cooldown) return
+
+    // gets a point in front of the player
+    const totalRange = this.w + this.weapon.range
+    const ax = Math.cos(this.angle)
+    const ay = Math.sin(this.angle)
+    const attackPoint = {
+      x: this.x + ax * totalRange,
+      y: this.y + ay * totalRange
+    }
+
+    // striking other players
+    Object.values(playerHandler.players).forEach(p => {
+      // no hitting yourself
+      if(p == this) return
+
+      // checks if strike point is inside other player
+      if(dist(attackPoint.x, attackPoint.y, p.x, p.y) < p.w * 0.5) {
+        p.xVel += 50 * this.w * ax * this.weapon.damage / p.w
+        p.yVel += 50 * this.w * ay * this.weapon.damage / p.w
+        p.health -= this.weapon.damage
+      }
+    })
+
+    console.log(attackPoint)
+    
+    this.attackCooldown = 0
+  }
   handleInput(input) {
     if(input.type === 'attack') {
-      if(this.attackCooldown < this.attackRate) return
-      bulletHandler.add(this.id, this.x, this.y, this.angle)
-      this.attackCooldown = 0
+      this.handleAttack()
     }else if(input.type === 'move') {
       this.moveState = input.keys
     }else if(input.type === 'angle') {
       this.angle = input.angle
     }
   }
-  update(dt, blocks) {
+  update(dt) {
 
-    this.attackCooldown = Math.min(this.attackCooldown + dt, this.attackRate)
+    // increment cooldown
+    this.attackCooldown = Math.min(this.attackCooldown + dt, this.weapon.cooldown)
 
+    // moving vertically
     if(this.moveState.up) this.yVel = Math.max(this.yVel - this.accel, -this.speed)
     else if(this.moveState.down) this.yVel = Math.min(this.yVel + this.accel, this.speed)
     else this.yVel *= this.slowdown
     
+    // moving horizontally
     if(this.moveState.left) this.xVel = Math.max(this.xVel - this.accel, -this.speed)
     else if(this.moveState.right) this.xVel = Math.min(this.xVel + this.accel, this.speed)
     else this.xVel *= this.slowdown
 
+    // saves the old position before update
     const oldPos = { x: this.x, y: this.y }
 
+    // updates position
     this.x += this.xVel * dt
     this.y += this.yVel * dt
 
+    // checks for collision with tile
     if(tileCollide(this.x, this.y, this.w, this.h)) {
       if(!tileCollide(oldPos.x, oldPos.y, this.w, this.h)) {
         const blockedY = tileCollide(oldPos.x, this.y, this.w, this.h)
@@ -98,33 +129,23 @@ class Player {
       } 
     }
 
-    // for(const b of blocks) {
-      // if(!rectRectCollide(this.x, this.y, PLAYER_SIZE, PLAYER_SIZE, b.x, b.y, b.w, b.h)) continue;
-      // const blockedX = Math.abs(oldPos.y - b.y) * 2 < PLAYER_SIZE + b.h
-    //   const blockedY = Math.abs(oldPos.x - b.x) * 2 < PLAYER_SIZE + b.w
-    //   if(blockedX) {
-    //     this.x = b.x + sign(oldPos.x - b.x) * ((PLAYER_SIZE + b.w) / 2 + 0.1)
-    //     this.xVel = 0
-    //   }
-    //   if(blockedY) {
-    //     this.y = b.y + sign(oldPos.y - b.y) * ((PLAYER_SIZE + b.h) / 2 + 0.1)
-    //     this.yVel = 0
-    //   }
-    // }
-
-    this.x = constrain(this.x, 0, MAP_W)
-    this.y = constrain(this.y, 0, MAP_H)
+    // keeps player from going off edge of map
+    this.x = constrain(this.x, this.w * 0.5, MAP_W - this.w * 0.5)
+    this.y = constrain(this.y, this.w * 0.5, MAP_H - this.w * 0.5)
   }
   getData() {
+    // returns data to be sent to client
     return {
       id: this.id,
       x: this.x,
       y: this.y,
+      size: this.w,
       angle: this.angle,
       health: this.health,
       username: this.username,
       teamId: this.teamId,
-      rank: this.rank
+      rank: this.rank,
+      cooldown: 1 - this.attackCooldown / this.weapon.cooldown
     }
   }
 }
@@ -151,21 +172,13 @@ const playerHandler = {
     if(data.type === 'character') {
       player.purchaseCharacter(data.character)
       player.changeCharacter(data.character)
+      player.health = player.maxHealth
     }
   }, 
   update(dt) {
     let arr = Object.values(this.players)
     for(let i = arr.length - 1; i >= 0; i--) {
       const player = arr[i]
-      bulletHandler.bullets.forEach(b => {
-        if(b.playerId === player.id) return
-        if(dist(b.x, b.y, player.x, player.y) < player.w * 0.5) {
-          player.health -= b.damage
-          player.xVel += b.xVel * b.speed
-          player.yVel += b.yVel * b.speed
-          b.dead = true
-        }
-      })
       player.update(dt)
     }
   }

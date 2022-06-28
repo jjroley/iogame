@@ -46,15 +46,18 @@ const PLAYER_STATS = [
 const WEAPON_STATS = {
   fists: {
     damage: 5,
-    cooldown: 0.2
+    cooldown: 0.2,
+    range: 10
   },
   knife: {
     damage: 1, 
-    cooldown: 0.1
+    cooldown: 0.1,
+    range: 15,
   },
   sword: {
     damage: 15,
-    cooldown: 0.5
+    cooldown: 0.5,
+    range: 25
   },
   bow: {
     damage: 0,
@@ -63,7 +66,8 @@ const WEAPON_STATS = {
   },
   giantFists: {
     damage: 50,
-    cooldown: 0.5
+    cooldown: 0.5,
+    range: 20
   }
 }
 
