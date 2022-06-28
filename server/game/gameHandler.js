@@ -8,8 +8,6 @@ const { placedTiles } = require('./tileData')
 
 
 const GameHandler = function() {
-  // this.players = {}
-  this.sockets = {}
   this.bullets = []
   this.blocks = []
   this.lastUpdate = Date.now()
@@ -24,19 +22,21 @@ GameHandler.prototype.addBlock = function(x, y) {
 GameHandler.prototype.addPlayer = function(socket, username) {
   const x = MAP_W / 2 + Math.random() * 400 - 200
   const y = MAP_H / 2 + Math.random() * 400 - 200
-  playerHandler.add(socket.id, username, x, y)
-  // this.players[socket.id] = new Player(socket.id, username, x, y) 
-  this.sockets[socket.id] = socket
+  playerHandler.add(socket, username, x, y) 
   this.sendInitialState(socket)
 }
 
 GameHandler.prototype.removePlayer = function(id) {
   playerHandler.remove(id)
-  delete this.sockets[id]
 }
+
 
 GameHandler.prototype.handleInput = function(id, input) {
   playerHandler.sendInput(id, input)
+}
+
+GameHandler.prototype.handleUpgrade = function(id, data) {
+  playerHandler.handleUpgrade(id, data)
 }
 
 GameHandler.prototype.sendInitialState = function(socket) {
@@ -60,7 +60,7 @@ GameHandler.prototype.update = function() {
   if(this.sendUpdate) {
     for(const key in playerHandler.players) {
       const player = playerHandler.players[key]
-      this.sockets[key].emit('gameupdate', this.buildUpdate(player))
+      playerHandler.sockets[key].emit('gameupdate', this.buildUpdate(player))
     }
   }
   this.sendUpdate = !this.sendUpdate

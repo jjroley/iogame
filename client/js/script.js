@@ -11,20 +11,31 @@ const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
 
 let inputCode = {}
-function handleKeyDown(e) {
+
+function handleWhateverKey(e) {
   if(e.keyCode === 87 || e.keyCode === 38) {
-    inputCode.up = true
+    return inputCode.up = true
   }
   if(e.keyCode === 83 || e.keyCode === 40) {
-    inputCode.down = true
+    return inputCode.down = true
   }
   if(e.keyCode === 65 || e.keyCode === 37) {
-    inputCode.left = true
+    return inputCode.left = true
   }
   if(e.keyCode === 68 || e.keyCode === 39) {
-    inputCode.right = true
+    return inputCode.right = true
   }
-  server.send('input', { type: 'move', keys: inputCode })
+}
+function handleKeyDown(e) {
+  if(handleWhateverKey(e)) {
+    server.send('input', { type: 'move', keys: inputCode })
+  }
+  if(/^\d$/.test(e.key)) {
+    server.send('upgrade', {
+      type: 'character',
+      character: parseInt(e.key)
+    })
+  }
 }
 function handleKeyUp(e) {
   if(e.keyCode === 87 || e.keyCode === 38) {

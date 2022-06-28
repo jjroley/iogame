@@ -2,6 +2,8 @@ const shortid = require('shortid')
 const { pointCornerRectCollide } = require('../../shared/collide')
 const { MAP_W, MAP_H } = require('../../shared/constants')
 const { tileCollide } = require('./tileData')
+// const { playerHandler } = require('./player')
+const { dist } = require('../../shared/math')
 
 class Bullet {
   constructor(playerId, x, y, angle) {
@@ -14,6 +16,7 @@ class Bullet {
     this.speed = 1000
     this.time = 10
     this.dead = false
+    this.damage = 20
   }
   handleCollide() {
     if(!pointCornerRectCollide(this.x, this.y, 0, 0, MAP_W, MAP_H)) return this.dead = true
@@ -38,9 +41,13 @@ const bulletHandler = {
   update(dt) {
     for(let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i]
+
+
       
       // handle collisions
       bullet.handleCollide()
+
+      
 
       if(bullet.dead) {
         this.bullets.splice(i, 1)

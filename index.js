@@ -32,6 +32,10 @@ io.on('connection', socket => {
   socket.on('input', function(input) {
     game.handleInput(socket.id, input)
   })
+  socket.on('upgrade', function(data) {
+    console.log(data)
+    game.handleUpgrade(socket.id, data)
+  })
   socket.on('disconnect', () => {
     console.log("Client disconnected: " + socket.id)
     game.removePlayer(socket.id)
@@ -50,3 +54,35 @@ placeTileData(1, 3, 1)
 placeTileData(2, 3, 1)
 placeTileData(2, 4, 1)
 
+
+placeTileData(9, 3, 1)
+placeTileData(8, 3, 1)
+placeTileData(7, 3, 1)
+placeTileData(7, 4, 1)
+
+
+placeTileData(0, 7, 1)
+placeTileData(1, 7, 1)
+placeTileData(2, 7, 1)
+placeTileData(2, 6, 1)
+
+placeTileData(9, 7, 1)
+placeTileData(8, 7, 1)
+placeTileData(7, 7, 1)
+placeTileData(7, 6, 1)
+
+placeTileData(4, 3, 1)
+placeTileData(4, 4, 1)
+placeTileData(4, 5, 1)
+placeTileData(4, 6, 1)
+placeTileData(4, 7, 1)
+
+placeTileData(5, 3, 1)
+placeTileData(5, 4, 1)
+placeTileData(5, 5, 1)
+placeTileData(5, 6, 1)
+placeTileData(5, 7, 1)
+
+
+placeTileData(3, 3, 1)
+placeTileData(6, 7, 1)

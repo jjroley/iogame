@@ -3,8 +3,9 @@ const { tileCollide } = require('./tileData')
 const constrain = (a, b, c) => a < b ? b : a > c ? c : a
 const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
 
-const { MAP_W, MAP_H, PLAYER_SIZE } = require('../../shared/constants')
+const { MAP_W, MAP_H, PLAYER_SIZE, PLAYER_STATS } = require('../../shared/constants')
 const { bulletHandler } = require('./bullet')
+const { dist } = require('../../shared/math')
 
 class Player {
   constructor(id, username, x, y) {
@@ -19,12 +20,40 @@ class Player {
     this.angle = 0
     this.speed = 200
     this.slowdown = 0.9
+    this.maxHealth = 0
     this.health = 100
     this.moveState = {}
     this.teamId = null
     this.rank = 0
     this.attackCooldown = 0
     this.attackRate = 1
+    this.coins = 1000000
+    this.purchasedCharacters = []
+    this.purchaseCharacter(0)
+    this.changeCharacter(0)
+  }
+  changeCharacter(character) {
+    if(character >= PLAYER_STATS.length) return
+    if(!this.purchasedCharacters.includes(character)) return
+    const stats = PLAYER_STATS[character]
+    this.health *= this.maxHealth / stats.health
+    this.maxHealth = stats.health
+    this.attackRate = stats.cooldown
+    if(stats.size) {
+      this.w = this.h = stats.size
+    }else {
+      this.w = this.h = PLAYER_SIZE
+    }
+    this.speed = stats.speed
+    this.rank = character
+    console.log("Changed to " + character, this.speed, this.w)
+  }
+  purchaseCharacter(character) {
+    if(character >= PLAYER_STATS.length) return
+    if(this.purchasedCharacters.includes(character)) return
+    if(this.coins < PLAYER_STATS[character].cost) return
+    this.purchasedCharacters.push(character)
+    this.coins -= PLAYER_STATS[character].cost
   }
   handleInput(input) {
     if(input.type === 'attack') {
@@ -102,21 +131,41 @@ class Player {
 
 const playerHandler = {
   players: {},
-  add(id, username, x, y) {
-    this.players[id] = new Player(id, username, x, y)
+  sockets: {},
+  add(socket, username, x, y) {
+    this.sockets[socket.id] = socket
+    this.players[socket.id] = new Player(socket.id, username, x, y)
   },
   remove(id) {
     delete this.players[id]
+    delete this.sockets[id]
   },
   sendInput(id, input) {
     const player = this.players[id]
     if(!player) return
     player.handleInput(input)
   },
+  handleUpgrade(id, data) {
+    const player = this.players[id]
+    if(!player) return
+    if(data.type === 'character') {
+      player.purchaseCharacter(data.character)
+      player.changeCharacter(data.character)
+    }
+  }, 
   update(dt) {
     let arr = Object.values(this.players)
     for(let i = arr.length - 1; i >= 0; i--) {
       const player = arr[i]
+      bulletHandler.bullets.forEach(b => {
+        if(b.playerId === player.id) return
+        if(dist(b.x, b.y, player.x, player.y) < player.w * 0.5) {
+          player.health -= b.damage
+          player.xVel += b.xVel * b.speed
+          player.yVel += b.yVel * b.speed
+          b.dead = true
+        }
+      })
       player.update(dt)
     }
   }
