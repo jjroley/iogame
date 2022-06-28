@@ -98,11 +98,10 @@ scene.use('game', () => {
   let blocks = []
 
   server.on('gameupdate', update => {
-    server.process(update)
+    server.processUpdate(update) 
   })
   server.on('death', data => scene.to('death', data))
   server.on('initialState', data => {
-    console.log(data)
     blocks = data.blocks
   })
   

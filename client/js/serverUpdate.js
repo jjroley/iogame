@@ -10,7 +10,7 @@ class ServerUpdate {
     this.gameUpdates = []
     this.gameStart = this.firstServerTimestamp = 0
   }
-  process(update) {
+  processUpdate(update) {
     if(!this.firstServerTimestamp) {
       this.gameStart = Date.now()
       this.firstServerTimestamp = update.timestamp

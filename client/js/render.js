@@ -1,6 +1,7 @@
 
 import { canvas, cache } from './canvas'
 import { cam } from './camera'
+import { BLOCK_SIZE, MAP_SIZE } from '../../shared/constants'
 
 const renderPlayer = player => {
 
@@ -56,12 +57,10 @@ const renderPlayer = player => {
 
 export const renderData = (data) => {
   canvas.graphics((ctx) => {
+    ctx.fillStyle = grass
+    ctx.fillRect(cam.x, cam.y, canvas.width, canvas.height)
     if(data.me) {
       cam.follow(data.me, ctx)
-      ctx.save()
-      ctx.fillStyle = grass
-      ctx.fillRect(cam.x, cam.y, canvas.width, canvas.height)
-      ctx.restore()
       renderPlayer(data.me)
     }
     if(data.others) {
@@ -75,30 +74,32 @@ export const renderData = (data) => {
         ctx.fill()
       })
     }
-    ctx.save()
-    ctx.strokeStyle = 'black'
-    ctx.lineWidth = 10
-    ctx.strokeRect(-1000, -1000, 2000, 2000)
-    ctx.restore()
     if(data.blocks) {
       ctx.fillStyle = 'gray'
       data.blocks.forEach(b => {
-        ctx.fillRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h)
+        ctx.fillRect(b.x * BLOCK_SIZE, b.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
       })
     }
+  })
+
+  // map boundary
+  canvas.graphics((ctx) => {
+    ctx.save()
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 10
+    ctx.strokeRect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE)
     ctx.restore()
   })
-  
 }
 
 
 
-const grass = cache(360, 360, (can, ctx, w, h) => {
+const grass = cache(BLOCK_SIZE * 4, BLOCK_SIZE * 4, (can, ctx) => {
   for(var x = 0; x < 4; x += 1) {
     for(var y = 0; y < 4; y += 1) {
       const g = x % 2 === y % 2 ? 1 : x % 2 === 0 ? 2 : 0
       ctx.fillStyle = `rgb(0, ${200 - g * 20}, 0)`
-      ctx.fillRect(x * 90, y * 90, 90, 90)
+      ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
     }
   }
 }, 'pattern')

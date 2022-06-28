@@ -12,7 +12,7 @@ const GameHandler = function() {
   this.blocks = []
   this.lastUpdate = Date.now()
   this.sendUpdate = true
-  setInterval(this.update.bind(this), 1000 / 60)
+  setInterval(() => this.update(), 1000 / 60)
 }
 
 GameHandler.prototype.addBlock = function(x, y) {
@@ -119,5 +119,6 @@ GameHandler.prototype.buildUpdate = function(player) {
     bullets,
   }
 }
+
 
 module.exports = GameHandler
