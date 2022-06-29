@@ -92,7 +92,7 @@ class Player {
         playerHandler.sendMessage('strike', { type: 'block', x: attackPoint.x, y: attackPoint.y })
       }
     }else if(this.weaponName === 'bow') {
-      bulletHandler.add(this.id, this.x, this.y, this.angle)
+      bulletHandler.add(this.id, this.username, this.x, this.y, this.angle)
     }
     
     this.attackCooldown = 0
@@ -204,36 +204,7 @@ const playerHandler = {
     this.remove(id)
   },
   update(dt) {
-    let arr = Object.values(this.players)
-    for(let i = arr.length - 1; i >= 0; i--) {
-      const player = arr[i]
-      if(player.health <= 0) {
-        this.sockets[player.id].emit('death', { shotBy: "Unknown" })
-        this.remove(player.id)
-        continue;
-      }
-      bulletHandler.bullets.forEach(bullet => {
-        if(tileCollide(bullet.x, bullet.y, 0, 0)) {
-          dealTileDamage(this.x, this.y, this.damage / 10)
-          this.sendMessage('strike', { type: 'block', x: bullet.x, y: bullet.y })
-          bullet.dead = true
-          return
-        }
-        if(bullet.dead || bullet.playerId === player.id) return
-        // if(bullet.teamId === player.teamId) return
-        if(dist(player.x, player.y, bullet.x, bullet.y) < player.w / 2) {
-          player.yVel = bullet.yVel * bullet.speed
-          player.xVel = bullet.xVel * bullet.speed
-          player.health -= bullet.damage
-          this.sendMessage('strike', { type: 'player', x: bullet.x, y: bullet.y})
-          bullet.dead = true
-          if(player.health <= 0) {
-            this.onDeath({ enemy: this.players[bullet.playerId].username }, player.id)
-          }
-        }
-      })
-      player.update(dt)
-    }
+    
   }
 }
 

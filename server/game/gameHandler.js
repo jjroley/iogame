@@ -5,7 +5,7 @@ const { dist } = require('../../shared/math')
 const { pointCenterRectCollide } = require('../../shared/collide')
 const { MAP_SIZE, MAP_W, MAP_H } = require('../../shared/constants')
 const { getTiles } = require('./tileData')
-
+const { update } = require('./update')
 
 const GameHandler = function() {
   this.blocks = []
@@ -48,11 +48,7 @@ GameHandler.prototype.update = function() {
   const dt = (now - this.lastUpdate) / 1000
   this.lastUpdate = now
 
-  // update players
-  playerHandler.update(dt)
-
-  // update bullets
-  bulletHandler.update(dt)
+  update(dt)
 
   // only sends an update every other frame
   if(this.sendUpdate) {

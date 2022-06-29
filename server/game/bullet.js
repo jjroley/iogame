@@ -6,9 +6,10 @@ const { tileCollide, dealTileDamage } = require('./tileData')
 const { dist } = require('../../shared/math')
 
 class Bullet {
-  constructor(playerId, x, y, angle) {
+  constructor(playerId, playerUsername, x, y, angle) {
     this.id = shortid()
     this.playerId = playerId
+    this.playerUsername = playerUsername
     this.teamId = null
     this.x = x
     this.y = y
@@ -35,28 +36,11 @@ class Bullet {
 
 const bulletHandler = {
   bullets: [],
-  add(playerId, x, y, angle) {
-    this.bullets.push(new Bullet(playerId, x, y, angle))
+  add(playerId, username, x, y, angle) {
+    this.bullets.push(new Bullet(playerId, username, x, y, angle))
   },
-  update(dt) {
-    for(let i = this.bullets.length - 1; i >= 0; i--) {
-      const bullet = this.bullets[i]
-
-
-      
-      // handle collisions
-      bullet.handleCollide()
-
-      
-
-      if(bullet.dead) {
-        this.bullets.splice(i, 1)
-        continue;
-      }
-
-      bullet.update(dt)
-    }
-  }
+  update(dt) {}
+    
 }
 
 module.exports = { Bullet, bulletHandler }
