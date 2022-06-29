@@ -9,7 +9,8 @@ class SceneHandler {
     this.__resizeCallbacks = []
     this.frameId = 0
     this.animated = false
-
+    this.lastFrameTime = null
+    this.dt = 0
     this.init()
   }
   init() {
@@ -50,6 +51,8 @@ class SceneHandler {
   }
   cancelLoop() {
     this.animated = false
+    this.lastFrameTime = null
+    this.dt = 0
     window.cancelAnimationFrame(this.frameId)
   }
   resize(cb) {
@@ -60,6 +63,8 @@ class SceneHandler {
   } 
   run() {
     if(!this.currentScene) return
+    this.dt = this.lastFrameTime ? (Date.now() - this.lastFrameTime) / 1000 : 0
+    this.lastFrameTime = Date.now()
     this.__sceneCallbacks.forEach(cb => cb())
   }
 }

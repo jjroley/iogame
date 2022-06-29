@@ -77,6 +77,8 @@ class Player {
           p.yVel += 50 * ay * (this.weapon.damage * 100) / p.w
           p.health -= this.weapon.damage
 
+          playerHandler.sendMessage('strike', { type: 'player', x: attackPoint.x, y: attackPoint.y })
+
           // check if player was killed by attack
           if(p.health <= 0) {
             playerHandler.onDeath({ enemy: this.username }, p.id)
@@ -86,7 +88,8 @@ class Player {
 
       // striking blocks
       if(tileCollide(attackPoint.x, attackPoint.y, 3, 3)) {
-        dealTileDamage(attackPoint.x, attackPoint.y, 10)
+        dealTileDamage(attackPoint.x, attackPoint.y, this.weapon.damage / 10)
+        playerHandler.sendMessage('strike', { type: 'block', x: attackPoint.x, y: attackPoint.y })
       }
     }else if(this.weaponName === 'bow') {
       bulletHandler.add(this.id, this.x, this.y, this.angle)
@@ -182,6 +185,11 @@ const playerHandler = {
     if(!player) return
     player.handleInput(input)
   },
+  sendMessage(type, data) {
+    Object.values(this.sockets).forEach(socket => {
+      socket.emit(type, data)
+    })
+  },
   handleUpgrade(id, data) {
     const player = this.players[id]
     if(!player) return
@@ -205,12 +213,19 @@ const playerHandler = {
         continue;
       }
       bulletHandler.bullets.forEach(bullet => {
+        if(tileCollide(bullet.x, bullet.y, 0, 0)) {
+          dealTileDamage(this.x, this.y, this.damage / 10)
+          this.sendMessage('strike', { type: 'block', x: bullet.x, y: bullet.y })
+          bullet.dead = true
+          return
+        }
         if(bullet.dead || bullet.playerId === player.id) return
         // if(bullet.teamId === player.teamId) return
         if(dist(player.x, player.y, bullet.x, bullet.y) < player.w / 2) {
           player.yVel = bullet.yVel * bullet.speed
           player.xVel = bullet.xVel * bullet.speed
           player.health -= bullet.damage
+          this.sendMessage('strike', { type: 'player', x: bullet.x, y: bullet.y})
           bullet.dead = true
           if(player.health <= 0) {
             this.onDeath({ enemy: this.players[bullet.playerId].username }, player.id)

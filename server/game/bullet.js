@@ -1,7 +1,7 @@
 const shortid = require('shortid')
 const { pointCornerRectCollide } = require('../../shared/collide')
 const { MAP_W, MAP_H } = require('../../shared/constants')
-const { tileCollide } = require('./tileData')
+const { tileCollide, dealTileDamage } = require('./tileData')
 // const { playerHandler } = require('./player')
 const { dist } = require('../../shared/math')
 
@@ -21,7 +21,6 @@ class Bullet {
   }
   handleCollide() {
     if(!pointCornerRectCollide(this.x, this.y, 0, 0, MAP_W, MAP_H)) return this.dead = true
-    if(tileCollide(this.x, this.y, 0, 0)) return this.dead = true
   }
   update(dt) {
     this.x += this.xVel * dt * this.speed

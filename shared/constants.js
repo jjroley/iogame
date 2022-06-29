@@ -67,7 +67,7 @@ const WEAPON_STATS = {
   giantFists: {
     damage: 50,
     cooldown: 0.5,
-    range: 20
+    range: 5
   }
 }
 

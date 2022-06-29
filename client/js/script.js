@@ -4,6 +4,9 @@ import { downloadAssets, renderData } from "./render"
 import server from './serverUpdate'
 import { canvas } from './canvas'
 import { cam } from './camera'
+import { BLOCK_SIZE } from '../../shared/constants'
+import { pointCornerRectCollide } from '../../shared/collide'
+import Particle from './particle'
 
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
@@ -53,19 +56,15 @@ function handleKeyUp(e) {
   }
   server.send('input', { type: 'move', keys: inputCode })
 }
-function handleClick(e) {
-  server.send('input', { type: 'attack' })
-}
+
 
 function startCapturingInput() {
   window.addEventListener('keydown', handleKeyDown)
   window.addEventListener('keyup', handleKeyUp)
-  window.addEventListener('mousedown', handleClick)
 }
 function stopCapturingInput() {
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('keyup', handleKeyUp)
-  window.removeEventListener('mousedown', handleClick)
 }
 
 Promise.all([ scene.connect, downloadAssets ]).then(() => {
@@ -128,18 +127,42 @@ scene.use('game', () => {
   server.reset()
 
   let tiles = []
+  let particles = []
+
+  function loadTiles(data) {
+    return data.map(t => {
+      return {
+        x: t[0] * BLOCK_SIZE,
+        y: t[1] * BLOCK_SIZE,
+        type: t[2],
+        health: t[3]
+      }
+    })
+  }
 
   server.on('gameupdate', update => {
     server.processUpdate(update) 
   })
   server.on('death', data => scene.to('death', data))
   server.on('initialState', data => {
-    tiles = data.tiles
+    tiles = loadTiles(data.tiles)
     loading = false
   })
   server.on('tiles', data => {
-    tiles = data
+    tiles = loadTiles(data)
   })
+  server.on('strike', data => {
+    // console.log('strike', data)
+    const color = data.type === 'block' ? [100, 100, 100] : [255, 255, 0]
+    for(var i = 0; i < 20; i++) {
+      particles.push(new Particle(data.x, data.y, color, Math.random() * 100))
+    }
+  })
+
+  function handleClick(e) {
+    server.send('input', { type: 'attack' })
+  }
+  window.addEventListener('mousedown', handleClick)
   
   // updated 60 times per second
   scene.loop(() => {
@@ -155,7 +178,16 @@ scene.use('game', () => {
       })
     }else {
       const state = server.getCurrentState()
-      renderData({ ...state, tiles })
+      renderData({ ...state, tiles, particles })
+      canvas.graphics((ctx) => {
+        for(var i = particles.length - 1; i >= 0; i--) {
+          particles[i].update(scene.dt)
+          if(particles[i].dead) {
+            particles.splice(i, 1)
+            continue;
+          }
+        }
+      })
       if(state.me) {
         server.send('input', { 
           type: "angle",
@@ -168,6 +200,7 @@ scene.use('game', () => {
   // called when user is leaving scene
   scene.cleanup(() => {
     stopCapturingInput()
+    window.removeEventListener('mousedown', handleClick)
     server.off('death')
     server.off('gameupdate')
     server.off('initialState')

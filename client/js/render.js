@@ -107,9 +107,9 @@ const renderPlayer = player => {
 const renderTile = tile => {
   canvas.graphics((ctx) => {
     ctx.fillStyle = brick
-    ctx.fillRect(tile[0] * BLOCK_SIZE, tile[1] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-    if(tile[3] < 50) {
-      ctx.drawImage(crack, tile[0] * BLOCK_SIZE, tile[1] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    ctx.fillRect(tile.x, tile.y, BLOCK_SIZE, BLOCK_SIZE)
+    if(tile.health < 50) {
+      ctx.drawImage(crack, tile.x, tile.y, BLOCK_SIZE, BLOCK_SIZE)
     }
   })
 }
@@ -138,6 +138,9 @@ export const renderData = (data) => {
     }
     if(data.tiles) {
       data.tiles.forEach(renderTile)
+    }
+    if(data.particles) {
+      data.particles.forEach(p => p.display(ctx))
     }
 
     // map boundary
