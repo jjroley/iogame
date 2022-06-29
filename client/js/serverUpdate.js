@@ -43,6 +43,7 @@ class ServerUpdate {
     const serverTime = this.currentServerTime();
   
     if (base < 0 || base === this.gameUpdates.length - 1) {
+      console.log('usu')
       return this.gameUpdates[this.gameUpdates.length - 1];
     } else {
       const baseUpdate = this.gameUpdates[base];
