@@ -1,12 +1,12 @@
 import io from 'socket.io-client'
 import { interpolateObject, interpolateObjects } from './interpolate'
 
-const socket = io()
 
 const RENDER_DELAY = 100
 
 class ServerUpdate {
   constructor() {
+    this.socket = io()
     this.gameUpdates = []
     this.gameStart = this.firstServerTimestamp = 0
   }
@@ -57,7 +57,7 @@ class ServerUpdate {
   }
   connect() {
     return new Promise(resolve => {
-      socket.on('connect', resolve)
+      this.socket.on('connect', resolve)
     })
   }
   reset() {
@@ -65,13 +65,13 @@ class ServerUpdate {
     this.gameStart = this.firstServerTimestamp = 0
   }
   send(msg, data) {
-    socket.emit(msg, data)
+    this.socket.emit(msg, data)
   }
   on(msg, cb) {
-    socket.on(msg, cb)
+    this.socket.on(msg, cb)
   }
   off(msg, cb) {
-    socket.off(msg, cb)
+    this.socket.off(msg, cb)
   }
 }
 

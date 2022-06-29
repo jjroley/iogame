@@ -11,7 +11,7 @@ const GameHandler = function() {
   this.blocks = []
   this.lastUpdate = Date.now()
   this.sendUpdate = true
-  setInterval(() => this.update(), 1000 / 60)
+  setInterval(() => this.update(), 1000 / 10)
 }
 
 GameHandler.prototype.addBlock = function(x, y) {
