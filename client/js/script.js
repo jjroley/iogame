@@ -1,6 +1,6 @@
 import '../css/style.css'
 import scene from "./scene"
-import { renderData } from "./render"
+import { downloadAssets, renderData } from "./render"
 import server from './serverUpdate'
 import { canvas } from './canvas'
 import { cam } from './camera'
@@ -34,7 +34,7 @@ function handleKeyDown(e) {
   if(/^\d$/.test(e.key)) {
     server.send('upgrade', {
       type: 'character',
-      character: parseInt(e.key)
+      character: parseInt(e.key) - 1
     })
   }
 }
@@ -60,15 +60,15 @@ function handleClick(e) {
 function startCapturingInput() {
   window.addEventListener('keydown', handleKeyDown)
   window.addEventListener('keyup', handleKeyUp)
-  window.addEventListener('click', handleClick)
+  window.addEventListener('mousedown', handleClick)
 }
 function stopCapturingInput() {
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('keyup', handleKeyUp)
-  window.removeEventListener('click', handleClick)
+  window.removeEventListener('mousedown', handleClick)
 }
 
-server.connect().then(() => {
+Promise.all([ scene.connect, downloadAssets ]).then(() => {
   scene.to('menu')
 })
 
@@ -136,6 +136,9 @@ scene.use('game', () => {
   server.on('initialState', data => {
     tiles = data.tiles
     loading = false
+  })
+  server.on('tiles', data => {
+    tiles = data
   })
   
   // updated 60 times per second

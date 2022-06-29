@@ -4,7 +4,7 @@ const { Player, playerHandler } = require('./player')
 const { dist } = require('../../shared/math')
 const { pointCenterRectCollide } = require('../../shared/collide')
 const { MAP_SIZE, MAP_W, MAP_H } = require('../../shared/constants')
-const { placedTiles } = require('./tileData')
+const { getTiles } = require('./tileData')
 
 
 const GameHandler = function() {
@@ -39,7 +39,7 @@ GameHandler.prototype.handleUpgrade = function(id, data) {
 
 GameHandler.prototype.sendInitialState = function(socket) {
   socket.emit('initialState', { 
-    tiles: placedTiles
+    tiles: getTiles()
   })
 }
 

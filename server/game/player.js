@@ -1,5 +1,5 @@
 const { rectRectCollide } = require('../../shared/collide')
-const { tileCollide } = require('./tileData')
+const { tileCollide, dealTileDamage } = require('./tileData')
 const constrain = (a, b, c) => a < b ? b : a > c ? c : a
 const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
 const { MAP_W, MAP_H, PLAYER_SIZE, PLAYER_STATS, WEAPON_STATS, BLOCK_SIZE } = require('../../shared/constants')
@@ -34,6 +34,7 @@ class Player {
     if(!this.purchasedCharacters.includes(character)) return
     const stats = PLAYER_STATS[character]
     this.weapon = WEAPON_STATS[stats.weapon]
+    this.weaponName = stats.weapon
     this.health && (this.health *= this.maxHealth / stats.health)
     this.maxHealth = stats.health
     if(stats.size) {
@@ -55,32 +56,42 @@ class Player {
   handleAttack() {
     if(this.attackCooldown < this.weapon.cooldown) return
 
-    // gets a point in front of the player
-    const totalRange = this.w + this.weapon.range
-    const ax = Math.cos(this.angle)
-    const ay = Math.sin(this.angle)
-    const attackPoint = {
-      x: this.x + ax * totalRange,
-      y: this.y + ay * totalRange
-    }
-
-    // striking other players
-    Object.values(playerHandler.players).forEach(p => {
-      // no hitting yourself
-      if(p == this) return
-
-      // check if strike point is inside other player
-      if(dist(attackPoint.x, attackPoint.y, p.x, p.y) < p.w * 0.5) {
-        p.xVel += 50 * this.w * ax * this.weapon.damage / p.w
-        p.yVel += 50 * this.w * ay * this.weapon.damage / p.w
-        p.health -= this.weapon.damage
-
-        // check if player was killed by attack
-        if(p.health <= 0) {
-          playerHandler.onDeath({ enemy: this.username }, p.id)
-        }
+    if(this.weaponName === 'sword' || this.weaponName === 'fists' || this.weaponName === 'giantFists') {
+      // gets a point in front of the player
+      const totalRange = this.w + this.weapon.range
+      const ax = Math.cos(this.angle)
+      const ay = Math.sin(this.angle)
+      const attackPoint = {
+        x: this.x + ax * totalRange,
+        y: this.y + ay * totalRange
       }
-    })    
+
+      // striking other players
+      Object.values(playerHandler.players).forEach(p => {
+        // no hitting yourself
+        if(p == this) return
+
+        // check if strike point is inside other player
+        if(dist(attackPoint.x, attackPoint.y, p.x, p.y) < p.w * 0.5 + 10) {
+          p.xVel += 50 * ax * (this.weapon.damage * 100) / p.w
+          p.yVel += 50 * ay * (this.weapon.damage * 100) / p.w
+          p.health -= this.weapon.damage
+
+          // check if player was killed by attack
+          if(p.health <= 0) {
+            playerHandler.onDeath({ enemy: this.username }, p.id)
+          }
+        }
+      })    
+
+      // striking blocks
+      if(tileCollide(attackPoint.x, attackPoint.y, 3, 3)) {
+        dealTileDamage(attackPoint.x, attackPoint.y, 10)
+      }
+    }else if(this.weaponName === 'bow') {
+      bulletHandler.add(this.id, this.x, this.y, this.angle)
+    }
+    
     this.attackCooldown = 0
   }
   handleInput(input) {
@@ -193,6 +204,19 @@ const playerHandler = {
         this.remove(player.id)
         continue;
       }
+      bulletHandler.bullets.forEach(bullet => {
+        if(bullet.dead || bullet.playerId === player.id) return
+        // if(bullet.teamId === player.teamId) return
+        if(dist(player.x, player.y, bullet.x, bullet.y) < player.w / 2) {
+          player.yVel = bullet.yVel * bullet.speed
+          player.xVel = bullet.xVel * bullet.speed
+          player.health -= bullet.damage
+          bullet.dead = true
+          if(player.health <= 0) {
+            this.onDeath({ enemy: this.players[bullet.playerId].username }, player.id)
+          }
+        }
+      })
       player.update(dt)
     }
   }

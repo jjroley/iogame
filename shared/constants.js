@@ -47,7 +47,7 @@ const WEAPON_STATS = {
   fists: {
     damage: 5,
     cooldown: 0.2,
-    range: 10
+    range: 0
   },
   knife: {
     damage: 1, 

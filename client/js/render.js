@@ -5,7 +5,6 @@ import { BLOCK_SIZE, MAP_H, MAP_W, PLAYER_STATS } from '../../shared/constants'
 
 
 
-
 const renderPlayer = player => {
   const PLAYER_SCALE = player.size / 60
   const stats = PLAYER_STATS[player.rank]
@@ -38,6 +37,41 @@ const renderPlayer = player => {
       ctx.ellipse(30 + player.cooldown * 10, -30 + player.cooldown * 10, 10, 10, 0, 0, Math.TWO_PI)
       ctx.fill()
       ctx.stroke()
+    }
+    else if(weapon === 'sword') {
+      ctx.save()
+
+      if(false && player.cooldown > 0.6) {
+        ctx.save()
+        ctx.fillStyle = '#fff'
+        ctx.globalOpacity = 0.4
+        ctx.beginPath()
+        ctx.moveTo(75, 10)
+        ctx.lineTo(50, 20)
+        ctx.lineTo(35, 20)
+        ctx.lineTo(75, 10)
+        ctx.fill()
+        ctx.restore()
+      }
+
+      ctx.rotate(-player.cooldown)
+
+      
+      ctx.translate(30, 30)
+      ctx.rotate(Math.PI / 4)
+      // ctx.fillStyle = 'gray'
+      // ctx.fillRect(-30, -30, 60, 60)
+      ctx.drawImage(assets['vortexSword.png'], -30, -30, 60, 60)
+      ctx.restore()
+    }
+    else if(weapon === 'bow') {
+      ctx.save()
+      ctx.lineWidth = 4
+      ctx.strokeStyle = 'brown'
+      ctx.beginPath()
+      ctx.arc(20, 0, 40, -Math.PI / 3, Math.PI / 3)
+      ctx.stroke()
+      ctx.restore()
     }
 
     ctx.restore()
@@ -74,6 +108,9 @@ const renderTile = tile => {
   canvas.graphics((ctx) => {
     ctx.fillStyle = brick
     ctx.fillRect(tile[0] * BLOCK_SIZE, tile[1] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    if(tile[3] < 50) {
+      ctx.drawImage(crack, tile[0] * BLOCK_SIZE, tile[1] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    }
   })
 }
 
@@ -133,3 +170,35 @@ const brick = cache(BLOCK_SIZE, BLOCK_SIZE, (can, ctx) => {
   ctx.fillRect(55, 5, 45, 40)
   ctx.fillRect(5, 55, 90, 40)
 }, 'pattern')
+
+const crack = cache(100, 100, (can, ctx) => {
+  ctx.lineWidth = 3
+  ctx.beginPath()
+  for(var i = 0; i < 10; i++) {
+    ctx.moveTo(Math.random() * 100, Math.random() * 100)
+    ctx.lineTo(Math.random() * 100, Math.random() * 100)
+  }
+  ctx.stroke()
+})
+
+
+const ASSET_NAMES = [
+  'vortexSword.png'
+]
+
+const assets = {}
+
+const downloadAsset = (name) => {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => {
+      assets[name] = img
+      resolve()
+    }
+    img.src = `/img/${name}`
+  })
+}
+
+export const downloadAssets = Promise.all(ASSET_NAMES.map(downloadAsset))
+
+

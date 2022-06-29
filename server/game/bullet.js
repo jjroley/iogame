@@ -9,6 +9,7 @@ class Bullet {
   constructor(playerId, x, y, angle) {
     this.id = shortid()
     this.playerId = playerId
+    this.teamId = null
     this.x = x
     this.y = y
     this.xVel = Math.cos(angle)

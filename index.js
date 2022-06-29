@@ -3,7 +3,7 @@ const path = require('path')
 const { Server: SocketServer } = require('socket.io')
 const express = require('express')
 const GameHandler = require('./server/game/gameHandler')
-const { placeTileData, placedTiles } = require('./server/game/tileData')
+const { placeTileData, onTilemapChange } = require('./server/game/tileData')
 const { MAP_H, MAP_SIZE } = require('./shared/constants')
 
 const app = express()
@@ -13,6 +13,8 @@ const server = createServer(app)
 // app.use(express.static(path.join(__dirname, './shared')))
 
 app.use(express.static('dist'))
+app.use(express.static('public'))
+
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/views/index.html')
@@ -92,3 +94,7 @@ placeTileData(6, 7, 1)
 for(var i = 0; i < 1000; i++) {
   placeTileData(~~(Math.random() * MAP_SIZE), ~~(Math.random() * MAP_SIZE), 1)
 }
+
+onTilemapChange(data => {
+  io.emit('tiles', data)
+})
