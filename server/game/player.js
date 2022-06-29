@@ -2,7 +2,7 @@ const { rectRectCollide } = require('../../shared/collide')
 const { tileCollide } = require('./tileData')
 const constrain = (a, b, c) => a < b ? b : a > c ? c : a
 const sign = (n) => n < 0 ? -1 : n > 0 ? 1 : 0
-const { MAP_W, MAP_H, PLAYER_SIZE, PLAYER_STATS, WEAPON_STATS } = require('../../shared/constants')
+const { MAP_W, MAP_H, PLAYER_SIZE, PLAYER_STATS, WEAPON_STATS, BLOCK_SIZE } = require('../../shared/constants')
 const { bulletHandler } = require('./bullet')
 const { dist } = require('../../shared/math')
 
@@ -19,8 +19,6 @@ class Player {
     this.angle = 0
     this.speed = 200
     this.slowdown = 0.9
-    this.maxHealth = 0
-    this.health = 100
     this.moveState = {}
     this.teamId = null
     this.rank = 0
@@ -29,13 +27,14 @@ class Player {
     this.purchasedCharacters = []
     this.purchaseCharacter(0)
     this.changeCharacter(0)
+    this.health = this.maxHealth
   }
   changeCharacter(character) {
     if(character >= PLAYER_STATS.length) return
     if(!this.purchasedCharacters.includes(character)) return
     const stats = PLAYER_STATS[character]
     this.weapon = WEAPON_STATS[stats.weapon]
-    this.health *= this.maxHealth / stats.health
+    this.health && (this.health *= this.maxHealth / stats.health)
     this.maxHealth = stats.health
     if(stats.size) {
       this.w = this.h = stats.size
@@ -44,7 +43,7 @@ class Player {
     }
     this.speed = stats.speed
     this.rank = character
-    console.log("Changed to " + character, this.speed, this.w, stats.name)
+    // console.log("Changed to " + character, this.speed, this.w, stats.name)
   }
   purchaseCharacter(character) {
     if(character >= PLAYER_STATS.length) return
@@ -70,16 +69,18 @@ class Player {
       // no hitting yourself
       if(p == this) return
 
-      // checks if strike point is inside other player
+      // check if strike point is inside other player
       if(dist(attackPoint.x, attackPoint.y, p.x, p.y) < p.w * 0.5) {
         p.xVel += 50 * this.w * ax * this.weapon.damage / p.w
         p.yVel += 50 * this.w * ay * this.weapon.damage / p.w
         p.health -= this.weapon.damage
-      }
-    })
 
-    console.log(attackPoint)
-    
+        // check if player was killed by attack
+        if(p.health <= 0) {
+          playerHandler.onDeath({ enemy: this.username }, p.id)
+        }
+      }
+    })    
     this.attackCooldown = 0
   }
   handleInput(input) {
@@ -114,19 +115,23 @@ class Player {
     this.y += this.yVel * dt
 
     // checks for collision with tile
-    if(tileCollide(this.x, this.y, this.w, this.h)) {
-      if(!tileCollide(oldPos.x, oldPos.y, this.w, this.h)) {
-        const blockedY = tileCollide(oldPos.x, this.y, this.w, this.h)
-        const blockedX = tileCollide(this.x, oldPos.y, this.w, this.h)
+    const tiles = tileCollide(this.x, this.y, this.w, this.h)
+    if(tiles) {
+      const r = (this.w + BLOCK_SIZE) / 2
+      for(const tile of tiles) {
+        const blockedX = Math.abs(tile.y - oldPos.y) < r
+        const blockedY = Math.abs(tile.x - oldPos.x) < r
         if(blockedX) {
-          this.x = oldPos.x
+          this.x = tile.x + sign(this.x - tile.x) * r
+          // this.x = oldPos.x
           this.xVel = 0
         }
         if(blockedY) {
-          this.y = oldPos.y
+          // this.y = oldPos.y
+          this.y = tile.y + sign(this.y - tile.y) * r
           this.yVel = 0
         }
-      } 
+      }
     }
 
     // keeps player from going off edge of map
@@ -175,10 +180,19 @@ const playerHandler = {
       player.health = player.maxHealth
     }
   }, 
+  onDeath(data, id) {
+    this.sockets[id].emit('death', data)
+    this.remove(id)
+  },
   update(dt) {
     let arr = Object.values(this.players)
     for(let i = arr.length - 1; i >= 0; i--) {
       const player = arr[i]
+      if(player.health <= 0) {
+        this.sockets[player.id].emit('death', { shotBy: "Unknown" })
+        this.remove(player.id)
+        continue;
+      }
       player.update(dt)
     }
   }

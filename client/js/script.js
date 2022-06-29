@@ -7,6 +7,7 @@ import { cam } from './camera'
 
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
+const playBtn = document.getElementById('join-game')
 const deathModal = document.getElementById('death-modal')
 const playAgainBtn = document.getElementById('play-again-btn')
 
@@ -55,6 +56,7 @@ function handleKeyUp(e) {
 function handleClick(e) {
   server.send('input', { type: 'attack' })
 }
+
 function startCapturingInput() {
   window.addEventListener('keydown', handleKeyDown)
   window.addEventListener('keyup', handleKeyUp)
@@ -70,11 +72,21 @@ server.connect().then(() => {
   scene.to('menu')
 })
 
+let whavm = false
+
 scene.use('menu', () => {
   usernameForm.classList.remove('hidden')
+
+  if(whavm) {
+    usernameForm.style.background = 'red'
+  }
+
+  whavm = true
+
   usernameInput.focus()
 
   const checkForInput = e => {
+    console.log('whatever')
     e.preventDefault()
     server.send('join game', usernameInput.value)
     console.log("Requesting to join", usernameInput.value)
@@ -82,7 +94,13 @@ scene.use('menu', () => {
     scene.to('game')
   }
 
-  usernameForm.addEventListener('submit', checkForInput)
+  usernameInput.addEventListener('keydown', (e) => {
+    if(e.key === "Enter") {
+      checkForInput(e)
+    }
+  })
+
+  playBtn.addEventListener('click', checkForInput)
 
   scene.resize(() => {
     canvas.graphics((ctx) => {
@@ -97,12 +115,13 @@ scene.use('menu', () => {
   })
   
   scene.cleanup(() => {
-    usernameForm.removeEventListener('submit', checkForInput)
     usernameForm.classList.add('hidden')
   })
 })
 
 scene.use('game', () => {
+  let loading = true
+
   inputCode = {}
   startCapturingInput()
   
@@ -116,17 +135,30 @@ scene.use('game', () => {
   server.on('death', data => scene.to('death', data))
   server.on('initialState', data => {
     tiles = data.tiles
+    loading = false
   })
   
   // updated 60 times per second
   scene.loop(() => {
-    const state = server.getCurrentState()
-    renderData({ ...state, tiles })
-    if(state.me) {
-      server.send('input', { 
-        type: "angle",
-        angle: Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
+    if(loading) {
+      canvas.graphics((ctx) => {
+        ctx.fillStyle = '#0a0'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = 'white'
+        ctx.font = '30px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText("Loading...", canvas.width / 2, canvas.height / 2)
       })
+    }else {
+      const state = server.getCurrentState()
+      renderData({ ...state, tiles })
+      if(state.me) {
+        server.send('input', { 
+          type: "angle",
+          angle: Math.atan2(cam.mouseY - state.me.y, cam.mouseX - state.me.x)
+        })
+      }
     }
   })
   
@@ -142,7 +174,7 @@ scene.use('game', () => {
 scene.use('death', (data) => {
   deathModal.showModal()
 
-  deathModal.querySelector('div').innerText = "Shot by " + data.shotBy
+  deathModal.querySelector('div').innerText = "Killed by " + data.enemy
   
   const goToMenu = () => scene.to('menu')
   
@@ -150,7 +182,6 @@ scene.use('death', (data) => {
   
   scene.cleanup(() => {
     deathModal.open = false
-    deathModal.classList.add('hidden')
     playAgainBtn.removeEventListener('click', goToMenu)
   })
 })

@@ -8,6 +8,8 @@ import { BLOCK_SIZE, MAP_H, MAP_W, PLAYER_STATS } from '../../shared/constants'
 
 const renderPlayer = player => {
   const PLAYER_SCALE = player.size / 60
+  const stats = PLAYER_STATS[player.rank]
+
   // display player
   canvas.graphics((ctx) => {
 
@@ -52,9 +54,9 @@ const renderPlayer = player => {
     let colorRed = 'rgb(200, 0, 0)'
     let colorGreen = 'rgb(0, 200, 0)'
     let colorYellow = 'rgb(200, 200, 0)'
-    ctx.fillStyle = player.health > 50 ? colorGreen : player.health > 25 ?  colorYellow : colorRed                 
+    ctx.fillStyle = player.health > stats.health / 2 ? colorGreen : player.health > stats.health / 4 ?  colorYellow : colorRed                 
     ctx.beginPath()
-    ctx.rect(player.x - 50, player.y - 50, player.health, 10)
+    ctx.rect(player.x - 50, player.y - 50, (player.health / stats.health) * 100, 10)
     ctx.fill()
     ctx.restore()
     

@@ -4,6 +4,7 @@ const { Server: SocketServer } = require('socket.io')
 const express = require('express')
 const GameHandler = require('./server/game/gameHandler')
 const { placeTileData, placedTiles } = require('./server/game/tileData')
+const { MAP_H, MAP_SIZE } = require('./shared/constants')
 
 const app = express()
 const server = createServer(app)
@@ -86,3 +87,8 @@ placeTileData(5, 7, 1)
 
 placeTileData(3, 3, 1)
 placeTileData(6, 7, 1)
+
+
+for(var i = 0; i < 1000; i++) {
+  placeTileData(~~(Math.random() * MAP_SIZE), ~~(Math.random() * MAP_SIZE), 1)
+}

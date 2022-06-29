@@ -15,12 +15,19 @@ const tileCollide = (ex, ey, ew, eh) => {
   const maxX = Math.floor((ex + ew * 0.5) / BLOCK_SIZE)
   const maxY = Math.floor((ey + eh * 0.5) / BLOCK_SIZE)
   // console.log(minX, minY, maxX, maxY)
+  let tiles = []
   for(let x = minX; x <= maxX; x++) {
     for(let y = minY; y <= maxY; y++) {
       if(x < 0 || x >= MAP_SIZE || y < 0 || y >= MAP_SIZE) continue
-      if(tileData[x + y * MAP_SIZE]) return true
+      if(tileData[x + y * MAP_SIZE]) {
+        tiles.push({
+          x: x * BLOCK_SIZE + BLOCK_SIZE * 0.5,
+          y: y * BLOCK_SIZE + BLOCK_SIZE * 0.5
+        })      
+      }
     }
   }
+  return tiles.length ? tiles : false
 }
 
 const placeTileData = (x, y, t) => {
