@@ -6,6 +6,7 @@ const { pointCenterRectCollide } = require('../../shared/collide')
 const { MAP_SIZE, MAP_W, MAP_H } = require('../../shared/constants')
 const { getTiles } = require('./tileData')
 const { update } = require('./update')
+const { teamHandler } = require('./team')
 
 const GameHandler = function() {
   this.blocks = []
@@ -43,6 +44,14 @@ GameHandler.prototype.sendInitialState = function(socket) {
   })
 }
 
+GameHandler.prototype.createTeam = function(socket, name) {
+  const player = playerHandler.players[socket.id]
+  if(!player) {
+    return socket.emit('create-team-failure', '')
+  }
+  teamHandler.createTeam(name, player)
+}
+
 GameHandler.prototype.update = function() {
   const now = Date.now()
   const dt = (now - this.lastUpdate) / 1000
@@ -69,6 +78,7 @@ GameHandler.prototype.buildUpdate = function(player) {
     me: player.getData(),
     others,
     bullets,
+    teams: Object.values(teamHandler.teams).map(t => t.getData())
   }
 }
 

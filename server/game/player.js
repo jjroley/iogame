@@ -190,6 +190,11 @@ const playerHandler = {
       socket.emit(type, data)
     })
   },
+  sendMessageTo(id, type, data) {
+    const socket = this.sockets[id]
+    if(!socket) return
+    socket.emit(type, data)
+  },
   handleUpgrade(id, data) {
     const player = this.players[id]
     if(!player) return

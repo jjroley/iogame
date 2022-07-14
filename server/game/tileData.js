@@ -40,7 +40,6 @@ const placeTileData = (x, y, t) => {
   if(x < 0 || x >= MAP_SIZE || y < 0 || y >= MAP_SIZE) return false
   tileData[x + y * MAP_SIZE] = t
   placedTiles.push([x, y, t, 100])
-  eventListeners.forEach(l => l(placedTiles))
 }
 
 
@@ -48,7 +47,6 @@ const destroyTile = (x, y) => {
   if(x < 0 || x >= MAP_SIZE || y < 0 || y >= MAP_SIZE) return false
   tileData[x + y * MAP_SIZE] = 0
   placedTiles = placedTiles.filter(t => t[0] !== x || t[1] !== y)
-  eventListeners.forEach(l => l(placedTiles))
   return true
 }
 
@@ -61,16 +59,26 @@ const dealTileDamage = (x, y, damage) => {
   const tile = placedTiles.find(t => t[0] === fx && t[1] === fy)
   if(tile) {
     tile[3] -= damage
-    if(tile[3] <= 0) {
-      destroyTile(fx, fy)
-    }else {
-      eventListeners.forEach(l => l(placedTiles))
-    }
+    destroyTile(fx, fy)
   }
 }
 
 const getTiles = () => placedTiles
 
-module.exports = { tileCollide, placeTileData, getTiles, destroyTile, initTileData, destroyTileFloat, dealTileDamage, onTilemapChange }
+const triggerTileUpdate = () => {
+  eventListeners.forEach(l => l(placedTiles))
+}
+
+module.exports = { 
+  tileCollide, 
+  placeTileData,
+  getTiles, 
+  destroyTile, 
+  initTileData, 
+  destroyTileFloat, 
+  dealTileDamage, 
+  onTilemapChange, 
+  triggerTileUpdate 
+}
 
 

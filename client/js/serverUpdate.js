@@ -52,7 +52,8 @@ class ServerUpdate {
       return {
         me: interpolateObject(baseUpdate.me, next.me, ratio, 'x', 'y', 'angle'),
         others: interpolateObjects(baseUpdate.others, next.others, ratio, 'x', 'y', 'angle'),
-        bullets: interpolateObjects(baseUpdate.bullets, next.bullets, ratio, 'x', 'y')
+        bullets: interpolateObjects(baseUpdate.bullets, next.bullets, ratio, 'x', 'y'),
+        teams: next.teams
       };
     }
   }

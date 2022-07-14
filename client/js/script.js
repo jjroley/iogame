@@ -7,6 +7,7 @@ import { cam } from './camera'
 import { BLOCK_SIZE } from '../../shared/constants'
 import { pointCornerRectCollide } from '../../shared/collide'
 import Particle from './particle'
+import { Popup, requestJoinTeamTemplate } from './hud'
 
 const usernameForm = document.getElementById('username-form')
 const usernameInput = document.getElementById('username')
@@ -128,6 +129,7 @@ scene.use('game', () => {
 
   let tiles = []
   let particles = []
+  let notifs = []
 
   function loadTiles(data) {
     return data.map(t => {
@@ -140,8 +142,27 @@ scene.use('game', () => {
     })
   }
 
+  function joinTeam(team) {
+    server.send('join-team', team.id)
+    notifs.push({ text: "Sent request to join team " + team.name })
+  }
+
+  function updateTeams(teams) {
+    const teamElem = document.getElementById('teams')
+    teamElem.innerHTML = ''
+    for(var i = 0; i < teams.length; i++) {
+      let t = document.createElement('div')
+      t.innerText = teams[i].name
+      t.onclick = () => {
+        joinTeam(teams[i])
+      }
+      teamElem.appendChild(t)
+    }
+  }
+
   server.on('gameupdate', update => {
-    server.processUpdate(update) 
+    server.processUpdate(update)
+    updateTeams(update.teams)
   })
   server.on('death', data => scene.to('death', data))
   server.on('initialState', data => {
@@ -158,11 +179,48 @@ scene.use('game', () => {
       particles.push(new Particle(data.x, data.y, color, Math.random() * 100))
     }
   })
+  server.on('joined-team', team => {
+    notifs.push({ text: "You have been accepted to team " + team.name })
+  })
 
   function handleClick(e) {
+
+
     server.send('input', { type: 'attack' })
   }
   window.addEventListener('mousedown', handleClick)
+    
+  Popup.create(requestJoinTeamTemplate, {
+    name: "Jake Sloan",
+    accept: () => console.log("accepted"),
+    reject: () => console.log("rejected")
+  }, { style: 'fade-in-up' })
+
+  // creating teams
+  const createTeamBtn = document.getElementById('create-team')
+  createTeamBtn.classList.remove('hidden')
+  createTeamBtn.addEventListener('click', toggleTeamCreateModal)
+  function toggleTeamCreateModal() {
+    const nameTeam = document.getElementById('name-team')
+    nameTeam.classList.toggle('hidden')
+    if(nameTeam.style.display === 'none') {
+      nameTeam.removeEventListener('keydown', submitTeamName)
+    }else {
+      nameTeam.addEventListener('keydown', submitTeamName)
+    }
+    function submitTeamName(e) {
+      // if(nameTeam.value === '') return
+      if(e.key === 'Enter') {
+        e.preventDefault()
+        server.send('create-team', { name: nameTeam.value })
+        notifs.push({ text: `Created team ${nameTeam.value}` })
+        // nameTeam.removeEventListener('keydown', submitTeamName)
+        nameTeam.classList.add('hidden')
+        createTeamBtn.classList.add('hidden')
+      }
+    }
+  }
+
   
   // updated 60 times per second
   scene.loop(() => {
@@ -188,6 +246,20 @@ scene.use('game', () => {
           }
         }
       })
+
+      canvas.graphics((ctx) => {
+        console.log(notifs.length)
+        for(var i = 0; i < notifs.length; i++) {
+          ctx.fillStyle = '#aaa'
+          ctx.fillRect(10, 10 + i * 50, 200, 40)
+          ctx.fillStyle = 'black'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.font = '20px sans-serif'
+          ctx.fillText(notifs[i].text, 105, 30 + i * 50)
+        }
+      })
+
       if(state.me) {
         server.send('input', { 
           type: "angle",
